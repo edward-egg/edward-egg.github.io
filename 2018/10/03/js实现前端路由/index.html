@@ -1,0 +1,393 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="路由就是根据不同的 url 地址展示不同的内容或页面，早期路由的概念是在后端出现的，通过服务器端渲染后返回页面，随着页面越来越复杂，服务器端压力越来越大。后来ajax异步刷新的出现使得前端也可以对url进行管理，此时，前端路由就出现了。单页面就是有前端路由来实现的，也就是说网站只有一个页面，点击导航会显示不同的内容，对应的url也在发生改变。在这个过程中，js会实时检测url的变化，从而改变...">
+  
+  <title>js实现前端路由 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/10/21/js柯里化/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js柯里化
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/09/29/虚拟dom实现/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        虚拟dom实现
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>js实现前端路由</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-10-03</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <p>路由就是根据不同的 url 地址展示不同的内容或页面，早期路由的概念是在后端出现的，通过服务器端渲染后返回页面，随着页面越来越复杂，服务器端压力越来越大。后来ajax异步刷新的出现使得前端也可以对url进行管理，此时，前端路由就出现了。单页面就是有前端路由来实现的，也就是说网站只有一个页面，点击导航会显示不同的内容，对应的url也在发生改变。在这个过程中，js会实时检测url的变化，从而改变显示的内容。</p>
+<h2 id="路由实现原理："><a href="#路由实现原理：" class="headerlink" title="路由实现原理："></a>路由实现原理：</h2><p>window绑定了监听函数，当url的hash值发生变化的时候会触发hashchange回调，在回调中进行不同的操作，马上刷新页面，从而显示不同的页面。</p>
+<p>下面是一个前端路由的简单实现：通过路由实现url的切换、页面内容的改变。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;!DOCTYPE html&gt;<br>&lt;html lang=<span class="hljs-string">"en"</span>&gt;<br>&lt;head&gt;<br>    &lt;meta charset=<span class="hljs-string">"UTF-8"</span>&gt;<br>    &lt;meta name=<span class="hljs-string">"viewport"</span> content=<span class="hljs-string">"width=device-width, initial-scale=1.0"</span>&gt;<br>    &lt;meta http-equiv=<span class="hljs-string">"X-UA-Compatible"</span> content=<span class="hljs-string">"ie=edge"</span>&gt;<br>    &lt;title&gt;前端路由测试&lt;/title&gt;<br>    &lt;script src=<span class="hljs-string">"../plugins/jQuery/jquery-1.12.4.min.js"</span>&gt;&lt;/script&gt;<br> <br>    &lt;style&gt;<br>        .content &#123;<br>            width: 50px;<br>            height: 50px;<br>            background-color: <span class="hljs-comment">#00a2d4;</span><br>        &#125;<br>    &lt;/style&gt;<br> <br>&lt;/head&gt;<br>&lt;body&gt;<br>&lt;ul&gt;<br>    &lt;li&gt;&lt;a href=<span class="hljs-string">"#/red"</span>&gt;turn red&lt;/a&gt;&lt;/li&gt;<br>    &lt;li&gt;&lt;a href=<span class="hljs-string">"#/blue"</span>&gt;turn blue&lt;/a&gt;&lt;/li&gt;<br>    &lt;li&gt;&lt;a href=<span class="hljs-string">"#/green"</span>&gt;turn green&lt;/a&gt;&lt;/li&gt;<br>&lt;/ul&gt;<br>&lt;div class=<span class="hljs-string">"content"</span>&gt;<br>&lt;/div&gt;<br> <br>&lt;script src=<span class="hljs-string">"router.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"test.js"</span>&gt;&lt;/script&gt;<br> <br>&lt;/body&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">//构造函数<br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">Router</span></span>() &#123;<br>    this.routes = &#123;&#125;;<br>    this.currentUrl = <span class="hljs-string">''</span>;<br>&#125;<br>Router.prototype.route = <span class="hljs-keyword">function</span>(path, callback) &#123;<br>    this.routes[path] = callback || <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;&#125;;//给不同的<span class="hljs-built_in">hash</span>设置不同的回调函数<br>&#125;;<br>Router.prototype.refresh = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    console.log(location.hash.slice(1));//获取到相应的<span class="hljs-built_in">hash</span>值<br>    this.currentUrl = location.hash.slice(1) || <span class="hljs-string">'/'</span>;//如果存在<span class="hljs-built_in">hash</span>值则获取到，否则设置<span class="hljs-built_in">hash</span>值为/<br>    // console.log(this.currentUrl);<br>    <span class="hljs-keyword">if</span>(this.currentUrl&amp;&amp;this.currentUrl!=<span class="hljs-string">'/'</span>)&#123;<br>        this.routes[this.currentUrl]();//根据当前的<span class="hljs-built_in">hash</span>值来调用相对应的回调函数<br>    &#125;<br> <br>&#125;;<br>Router.prototype.init = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    window.addEventListener(<span class="hljs-string">'load'</span>, this.refresh.bind(this), <span class="hljs-literal">false</span>);<br>    window.addEventListener(<span class="hljs-string">'hashchange'</span>, this.refresh.bind(this), <span class="hljs-literal">false</span>);<br>&#125;<br>//给window对象挂载属性<br>window.Router = new Router();<br>window.Router.init();<br></code></pre></td></tr></table></figure>
+<p>test.js<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">Router.route(<span class="hljs-string">'/red'</span>, <span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    $(<span class="hljs-string">".content"</span>).css(<span class="hljs-string">'background-color'</span>,<span class="hljs-string">'red'</span>)<br>&#125;);<br>Router.route(<span class="hljs-string">'/blue'</span>, <span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    $(<span class="hljs-string">".content"</span>).css(<span class="hljs-string">'background-color'</span>,<span class="hljs-string">'blue'</span>)<br>&#125;);<br>Router.route(<span class="hljs-string">'/green'</span>, <span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    $(<span class="hljs-string">".content"</span>).css(<span class="hljs-string">'background-color'</span>,<span class="hljs-string">'green'</span>)<br>&#125;);<br></code></pre></td></tr></table></figure></p>
+<p>上面router对象实现主要提供了三个方法</p>
+<p>1.init监听浏览器url的hash值更新事件。</p>
+<p>2.route存储路由更新时的回调到回调数组routes中，回掉函数将负责对页面进行更新。</p>
+<h2 id="3-refresh执行当前url的回调函数，更新页面。"><a href="#3-refresh执行当前url的回调函数，更新页面。" class="headerlink" title="3.refresh执行当前url的回调函数，更新页面。"></a>3.refresh执行当前url的回调函数，更新页面。</h2><p>本文来自 二萌偏 的CSDN 博客 ，全文地址请点击：<a href="https://blog.csdn.net/weixin_39735923/article/details/80386690?utm_source=copy" target="_blank" rel="noopener">https://blog.csdn.net/weixin_39735923/article/details/80386690?utm_source=copy</a> </p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#路由实现原理："><span class="toc-text">路由实现原理：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-refresh执行当前url的回调函数，更新页面。"><span class="toc-text">3.refresh执行当前url的回调函数，更新页面。</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/10/21/js柯里化/" class="prev">&larr; Prev post js柯里化</a>
+  
+
+  
+
+  
+    <a href="/2018/09/29/虚拟dom实现/" class="next">Next post 虚拟dom实现 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

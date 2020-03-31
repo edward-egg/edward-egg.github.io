@@ -1,0 +1,470 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="常见Promise面试题我们看一些 Promise 的常见面试问法，由浅至深。
+1.了解 Promise 吗？2.Promise 解决的痛点是什么？3.Promise 解决的痛点还有其他方法可以解决吗？如果有，请列举。4.Promise 如何使用？5.Promise 常用的方法，方法的作用？6.Promise 在事件循环中的执行过程是怎样的？7.Promise 的业界实现都有哪些？8.能不能...">
+  
+  <title>js Promise [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/28/JS执行环境和作用域/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        JS执行环境和作用域
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/28/js事件委托/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js事件委托
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>js Promise</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-28</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="常见Promise面试题"><a href="#常见Promise面试题" class="headerlink" title="常见Promise面试题"></a>常见Promise面试题</h2><p>我们看一些 Promise 的常见面试问法，由浅至深。</p>
+<p>1.了解 Promise 吗？<br>2.Promise 解决的痛点是什么？<br>3.Promise 解决的痛点还有其他方法可以解决吗？如果有，请列举。<br>4.Promise 如何使用？<br>5.Promise 常用的方法，方法的作用？<br>6.Promise 在事件循环中的执行过程是怎样的？<br>7.Promise 的业界实现都有哪些？<br>8.能不能手写一个 Promise 的polyfill。</p>
+<h2 id="Promise-出现的原因"><a href="#Promise-出现的原因" class="headerlink" title="Promise 出现的原因"></a>Promise 出现的原因</h2><p>在Promise出现之前，我们处理一个异步网络请求，大概这样:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">// 请求 代表 一个异步网络调用。<br>// 请求结果 代表网络请求的响应。<br>请求1(<span class="hljs-keyword">function</span>(请求结果1)&#123;<br>    处理请求结果1<br>&#125;)<br></code></pre></td></tr></table></figure></p>
+<p>当需求多时，会出现以下代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash"><br>请求1(<span class="hljs-keyword">function</span>(请求结果1)&#123;<br>    请求2(<span class="hljs-keyword">function</span>(请求结果2)&#123;<br>        请求3(<span class="hljs-keyword">function</span>(请求结果3)&#123;<br>            请求4(<span class="hljs-keyword">function</span>(请求结果4)&#123;<br>                请求5(<span class="hljs-keyword">function</span>(请求结果5)&#123;<br>                    请求6(<span class="hljs-keyword">function</span>(请求结果3)&#123;<br>                        ...<br>                    &#125;)<br>                &#125;)<br>            &#125;)<br>        &#125;)<br>    &#125;)<br></code></pre></td></tr></table></figure></p>
+<p>回调地狱带来的负面作用有以下几点：</p>
+<ul>
+<li>代码臃肿。</li>
+<li>可读性差。</li>
+<li>耦合度过高，可维护性差。</li>
+<li>代码复用性差。</li>
+<li>容易滋生 bug。</li>
+<li>只能在回调里处理异常。</li>
+</ul>
+<p>出现了问题，自然就会有人去想办法。这时，就有人思考了，能不能用一种更加友好的代码组织方式，解决异步嵌套的问题。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">let</span> 请求结果1 = 请求1();<br><span class="hljs-built_in">let</span> 请求结果2 = 请求2(请求结果1); <br><span class="hljs-built_in">let</span> 请求结果3 = 请求3(请求结果2); <br><span class="hljs-built_in">let</span> 请求结果4 = 请求2(请求结果3); <br><span class="hljs-built_in">let</span> 请求结果5 = 请求3(请求结果4);<br></code></pre></td></tr></table></figure></p>
+<p>类似上面这种同步的写法。于是 Promise 规范诞生了，并且在业界有了很多实现来解决回调地狱的痛点。比如业界著名的 Q 和 bluebird，bluebird 甚至号称运行最快的类库。</p>
+<h2 id="什么是Promise"><a href="#什么是Promise" class="headerlink" title="什么是Promise"></a>什么是Promise</h2><p>Promise 是异步编程的一种解决方案，比传统的异步解决方案【回调函数】和【事件】更合理、更强大。现已被 ES6 纳入进规范中。</p>
+<h3 id="代码书写"><a href="#代码书写" class="headerlink" title="代码书写"></a>代码书写</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">new Promise(请求1)<br>    .<span class="hljs-keyword">then</span>(请求2(请求结果1))<br>    .<span class="hljs-keyword">then</span>(请求3(请求结果2))<br>    .<span class="hljs-keyword">then</span>(请求4(请求结果3))<br>    .<span class="hljs-keyword">then</span>(请求5(请求结果4))<br>    .catch(处理异常(异常信息))<br></code></pre></td></tr></table></figure>
+<p>比较一下这种写法和上面的回调式的写法。我们不难发现，Promise 的写法更为直观，并且能够在外层捕获异步函数的异常信息。</p>
+<h3 id="API"><a href="#API" class="headerlink" title="API"></a>API</h3><p>常用API:</p>
+<ul>
+<li>Promise.resolve(value)</li>
+</ul>
+<p>方法返回一个以 value 值解析后的Promise对象<br>1.如果这个值是个thenable（即带有then方法），返回的promise会“跟随”这个thenable的对象，采用它的最终状态（指 resolved/rejected/pending/settled）<br>2.如果传入的 value 本身就是 promise 对象，则该对象作为 Promise.resolve 方法的返回值返回。<br>3.其他情况以该值为成功状态返回一个 promise 对象。</p>
+<p>demmo:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">//如果传入的 value 本身就是 promise 对象，则该对象作为 Promise.resolve 方法的返回值返回。  <br><span class="hljs-keyword">function</span> fn(resolve)&#123;<br>    setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        resolve(123);<br>    &#125;,3000);<br>&#125;<br><span class="hljs-built_in">let</span> p0 = new Promise(fn);<br><span class="hljs-built_in">let</span> p1 = Promise.resolve(p0);<br>// 返回为<span class="hljs-literal">true</span>，返回的 promise 即是 入参的 promise 对象。<br>console.log(p0 === p1);<br></code></pre></td></tr></table></figure></p>
+<p>ES6 Promises里提到了Thenable这个概念，简单来说它就是一个非常类似promise的东西。最简单的例子就是 jQuery.ajax，它的返回值就是 thenable 对象。但是要谨记，并不是只要实现了then 方法就一定能作为 Promise 对象来使用。</p>
+<ul>
+<li><strong>Promise.reject</strong></li>
+</ul>
+<p>与 resolve 唯一的不同是，返回的 promise 对象的状态为 rejected。</p>
+<ul>
+<li><strong>then</strong></li>
+</ul>
+<p>为 promise 注册回调函数，函数形式：fn(vlaue){}，value 是上一个任务的返回结果，then 中的函数一定要 return 一个结果或者一个新的 Promise 对象，才可以让之后的then 回调接收。</p>
+<ul>
+<li><p><strong>catch</strong><br>捕获异常，函数形式：fn(err){}, err 是 catch注册 之前的回调抛出的异常信息。</p>
+</li>
+<li><p><strong>race</strong></p>
+</li>
+</ul>
+<p>多个promise 任务同时执行，只返回最先执行完的 Promise 任务的结果。。</p>
+<ul>
+<li><strong>all</strong></li>
+</ul>
+<p>多个promise 任务同时执行，返回所有promise 任务的执行结果。</p>
+<h2 id="如何理解Promise"><a href="#如何理解Promise" class="headerlink" title="如何理解Promise"></a>如何理解Promise</h2><p>举例:<br>为了便于理解 Promise，大家除了要多加练习以外，最好的方式是能够将Promise的机制与现实生活中的例子联系起来，这样才能真正得到消化。</p>
+<p>我们可以把 Promise 比作一个保姆，家里的一连串的事情，你只需要吩咐给他，他就能帮你做，你就可以去做其他事情了。<br>比如，作为一家之主的我，某一天要出门办事，但是我还要买菜做饭送到老婆单位（请理解我在家里的地位。。）</p>
+<p>出门办的事情很重要，买菜做饭也重要。。但我自己只能做一件事。</p>
+<p>这时我就可以把买菜做饭的事情交给保姆，我会告诉她：</p>
+<ul>
+<li>你先去超市买菜。</li>
+<li>用超市买回来的菜做饭。</li>
+<li>将做好的饭菜送到老婆单位。</li>
+<li>送到单位后打电话告诉我。<br>我们知道，上面三步都是需要消耗时间的，我们可以理解为三个异步任务。利用 Promise 的写法来书写这个操作：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> 买菜(resolve，reject) &#123;<br>    setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        resolve([<span class="hljs-string">'西红柿'</span>、<span class="hljs-string">'鸡蛋'</span>、<span class="hljs-string">'油菜'</span>]);<br>    &#125;,3000)<br>&#125;<br><span class="hljs-keyword">function</span> 做饭(resolve, reject)&#123;<br>    setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        //对做好的饭进行下一步处理。<br>        <span class="hljs-built_in">return</span> (&#123;<br>            主食: <span class="hljs-string">'米饭'</span>,<br>            菜: [<span class="hljs-string">'西红柿炒鸡蛋'</span>、<span class="hljs-string">'清炒油菜'</span>]<br>        &#125;)<br>    &#125;,3000) <br>&#125;<br><span class="hljs-keyword">function</span> 送饭(resolve，reject)&#123;<br>    //对送饭的结果进行下一步处理<br>    resolve(<span class="hljs-string">'老婆的么么哒'</span>);<br>&#125;<br><span class="hljs-keyword">function</span> 电话通知我()&#123;<br>    //电话通知我后的下一步处理<br>    给保姆加100块钱奖金;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>好了，现在我整理好了四个任务，这时我需要告诉保姆，让他按照这个任务列表去做。这个过程是必不可少的，因为如果不告诉保姆，保姆不知道需要做这些事情。。（我这个保姆比较懒）<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash"><br>// 告诉保姆帮我做几件连贯的事情，先去超市买菜<br>new Promise(买菜)<br>//用买好的菜做饭<br>.<span class="hljs-keyword">then</span>((买好的菜)=&gt;&#123;<br>    <span class="hljs-built_in">return</span> new Promise(做饭);<br>&#125;)<br>//把做好的饭送到老婆公司<br>.<span class="hljs-keyword">then</span>((做好的饭)=&gt;&#123;<br>    <span class="hljs-built_in">return</span> new Promise(送饭);<br>&#125;)<br>//送完饭后打电话通知我<br>.<span class="hljs-keyword">then</span>((送饭结果)=&gt;&#123;<br>    电话通知我();<br></code></pre></td></tr></table></figure></p>
+<p>如果我们的后续任务是异步任务的话，必须return 一个 新的 promise 对象。<br>如果后续任务是同步任务，只需 return 一个结果即可。<br>我们上面举的例子，除了电话通知我是一个同步任务，其余的都是异步任务，异步任务 return 的是 promise对象。</p>
+<p>一个 Promise 对象有三个状态，并且状态一旦改变，便不能再被更改为其他状态。</p>
+<ul>
+<li>pending，异步任务正在进行。</li>
+<li>resolved (也可以叫fulfilled)，异步任务执行成功。</li>
+<li>rejected，异步任务执行失败。</li>
+</ul>
+<h2 id="Promise的使用总结"><a href="#Promise的使用总结" class="headerlink" title="Promise的使用总结"></a>Promise的使用总结</h2><ul>
+<li><p>首先初始化一个 Promise 对象，可以通过两种方式创建，这两种方式都会返回一个 Promise 对象。</p>
+<ul>
+<li>1、new Promise(fn)</li>
+<li>2、Promise.resolve(fn)</li>
+</ul>
+</li>
+<li><p>然后调用上一步返回的 promise 对象的 then 方法，注册回调函数。</p>
+<ul>
+<li><p>then 中的回调函数可以有一个参数，也可以不带参数。如果 then 中的回调函数依赖上一步的返回结果，那么要带上参数。比如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">    new Promise(fn)<br>.<span class="hljs-keyword">then</span>(fn1(value）&#123;<br>    //处理value<br>&#125;)<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>最后注册 catch 异常处理函数，处理前面回调中可能抛出的异常。</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>通常按照这三个步骤，你就能够应对绝大部分的异步处理场景。用熟之后，再去研究 Promise 各个函数更深层次的原理以及使用方式即可。</p>
+<p>看到这里之后，我们便能回答上面的问题 4 和问题 5了。</p>
+<h2 id="Promise与时间循环"><a href="#Promise与时间循环" class="headerlink" title="Promise与时间循环"></a>Promise与时间循环</h2><p>Promise在初始化时，传入的函数是同步执行的，然后注册 then 回调。注册完之后，继续往下执行同步代码，在这之前，then 中回调不会执行。同步代码块执行完毕后，才会在事件循环中检测是否有可用的 promise 回调，如果有，那么执行，如果没有，继续下一个事件循环。</p>
+<p>关于 Promise 在事件循环中还有一个 微任务的概念（microtask），感兴趣的话可以看这篇关于nodejs 时间循环的文章 <a href="https://juejin.im/post/5af1413ef265da0b851cce80" target="_blank" rel="noopener">剖析nodejs的事件循环</a>，虽然和浏览器端有些不同，但是Promise 微任务的执行时机相差不大。</p>
+<h2 id="Promise的升级"><a href="#Promise的升级" class="headerlink" title="Promise的升级"></a>Promise的升级</h2><p>ES6 出现了 generator 以及 async/await 语法，使异步处理更加接近同步代码写法，可读性更好，同时异常捕获和同步代码的书写趋于一致。上面的列子可以写成这样：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">(async ()=&gt;&#123;<br>    <span class="hljs-built_in">let</span> 蔬菜 = await 买菜();<br>    <span class="hljs-built_in">let</span> 饭菜 = await 做饭(蔬菜);<br>    <span class="hljs-built_in">let</span> 送饭结果 = await 送饭(饭菜);<br>    <span class="hljs-built_in">let</span> 通知结果 = await 通知我(送饭结果);<br>&#125;)();<br></code></pre></td></tr></table></figure></p>
+<h2 id="相关连接"><a href="#相关连接" class="headerlink" title="相关连接"></a>相关连接</h2><p><a href="https://blog.csdn.net/cuit/article/details/53174985" target="_blank" rel="noopener">JavaScript promise 链，并行promise</a></p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#常见Promise面试题"><span class="toc-text">常见Promise面试题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Promise-出现的原因"><span class="toc-text">Promise 出现的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是Promise"><span class="toc-text">什么是Promise</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#代码书写"><span class="toc-text">代码书写</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#API"><span class="toc-text">API</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何理解Promise"><span class="toc-text">如何理解Promise</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Promise的使用总结"><span class="toc-text">Promise的使用总结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Promise与时间循环"><span class="toc-text">Promise与时间循环</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Promise的升级"><span class="toc-text">Promise的升级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#相关连接"><span class="toc-text">相关连接</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/28/JS执行环境和作用域/" class="prev">&larr; Prev post JS执行环境和作用域</a>
+  
+
+  
+
+  
+    <a href="/2018/07/28/js事件委托/" class="next">Next post js事件委托 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

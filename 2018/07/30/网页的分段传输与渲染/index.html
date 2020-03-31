@@ -1,0 +1,394 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="最近遇到这方面知识，就自己找了一些资料，进行了一些总结
+什么是分段传输？当引入了一个http首部。这个首部标识了实体采用chunked编码传输，chunked编码可以将实体分块儿进行传输，并且chunked编码的每一块内容都会自标识长度。这给了web开发者一个启示，如果需要多个数据，而多个数据均返回较慢的话。可以处理完一块就返回一块，让浏览器尽早的接收到html，可以先行渲染。
+如何分段传输...">
+  
+  <title>网页的分段传输与渲染 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/30/Web前端中的安全问题/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        Web前端中的安全问题
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/29/js深拷贝与浅拷贝/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js深拷贝与浅拷贝
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>网页的分段传输与渲染</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-30</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/Web/">Web</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/HTML/">HTML</a>
+      
+      </span>
+      
+    </p>
+    
+    <p>最近遇到这方面知识，就自己找了一些资料，进行了一些总结</p>
+<h2 id="什么是分段传输？"><a href="#什么是分段传输？" class="headerlink" title="什么是分段传输？"></a>什么是分段传输？</h2><p>当引入了一个http首部。这个首部标识了实体采用chunked编码传输，chunked编码可以将实体分块儿进行传输，并且chunked编码的每一块内容都会自标识长度。这给了web开发者一个启示，如果需要多个数据，而多个数据均返回较慢的话。可以处理完一块就返回一块，让浏览器尽早的接收到html，可以先行渲染。</p>
+<h2 id="如何分段传输？"><a href="#如何分段传输？" class="headerlink" title="如何分段传输？"></a>如何分段传输？</h2><p>我们既然知道了可以将网页一块儿一块儿的传送，那么我们就可以将网页进行改造，拿好一块儿需要的数据，便渲染一块儿，无需等待，而模板方面，自然也要进行拆分，供服务端拿一块儿的模板，就渲染一块儿出去</p>
+<p>最后我们会发现：总的处理时长不变，但是采用了分段输出的网页，可以尽早的将一段HTML渲染到客户端，这样用户可以使用先到达的部分。另一方面，尽早的页面反馈，也可以减少用户等待的焦躁情绪。</p>
+<p>综上，使用此种优化方法，可以提速网页的渲染速度。</p>
+<h2 id="分段传输适用场景"><a href="#分段传输适用场景" class="headerlink" title="分段传输适用场景"></a>分段传输适用场景</h2><p>1.当页面的某些后端处理比较耗时的时候，可以试试采用分段传输，可以渲染一部分，就发送一部分到客户端，虽然总时长不变，但是浏览器在全部传输完之前不会处于干等状态。可以尽早的渲染并给予用户反馈。</p>
+<p>2.后端处理渲染的数据，上方较快，下方较慢的情况(可以先行渲染上方较快的部分)</p>
+<h2 id="bigpipe"><a href="#bigpipe" class="headerlink" title="bigpipe"></a>bigpipe</h2><p>把最慢的部分放置于底部传过来就好了。于是有了一种加载思路，便是使用js回填的方式，后端可以先渲染快的模板，然后再渲染慢的模板。我们可以把页面上所有的块儿都架空，然后并行渲染，谁快谁就先渲染回填js。这样就可以达到并行且先到先渲染的目的.</p>
+<h2 id="bigpipe的适用场景"><a href="#bigpipe的适用场景" class="headerlink" title="bigpipe的适用场景"></a>bigpipe的适用场景</h2><p>1.后端有较慢的数据处理，阻塞住了页面的情况下，且最慢的部分不是在网页的最后。(可以把最慢的部分变为回填)<br>2.后端有多块儿数据要并行处理的情况下(你也不知道哪块儿先回来了，所以先渲染一个架子。对于并行的请求，先回来的先flush回填)</p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是分段传输？"><span class="toc-text">什么是分段传输？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#如何分段传输？"><span class="toc-text">如何分段传输？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分段传输适用场景"><span class="toc-text">分段传输适用场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bigpipe"><span class="toc-text">bigpipe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#bigpipe的适用场景"><span class="toc-text">bigpipe的适用场景</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/30/Web前端中的安全问题/" class="prev">&larr; Prev post Web前端中的安全问题</a>
+  
+
+  
+
+  
+    <a href="/2018/07/29/js深拷贝与浅拷贝/" class="next">Next post js深拷贝与浅拷贝 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

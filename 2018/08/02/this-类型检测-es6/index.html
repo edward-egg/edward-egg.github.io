@@ -1,0 +1,411 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="this相关 关于this的详细介绍可以查看 MDN this 。在谈如何改变函数中this的指向时，我们先来谈一下this指向的究竟是什么。在传统的面向对象语言中，this指向的就是对象本身，那么JS是不是也一样呢？首先我们先执行下面的代码 123456789101112 function getThis() &#123;    console.log(this)&#125;getThis...">
+  
+  <title>this,类型检测,es6 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/02/js关于作用域，作用域链和闭包的理解/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js关于作用域，作用域链和闭包的理解
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/31/ajax实现原理/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        ajax实现原理
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>this,类型检测,es6</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-02</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="this相关"><a href="#this相关" class="headerlink" title="this相关"></a>this相关</h2><p> 关于this的详细介绍可以查看 <a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/this" target="_blank" rel="noopener">MDN this</a> 。在谈如何改变函数中this的指向时，我们先来谈一下this指向的究竟是什么。在传统的面向对象语言中，this指向的就是对象本身，那么JS是不是也一样呢？首先我们先执行下面的代码<br> <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"> <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">getThis</span></span>() &#123;<br>    console.log(this)<br>&#125;<br>getThis(); //Window<br><br>var ObjectB = &#123;<br>    getThis: getThis<br>&#125;<br>ObjectB.getThis() //Object<br><br>var getThisA = ObjectB.getThis<br>getThisA() //Object<br></code></pre></td></tr></table></figure></p>
+<p> 输出结果<br> <img src="https://img-blog.csdn.net/20170917212002240?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMTcwMDQzMjc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+<p> 如果this指向的是对象本身的话，那么三个输出应该是一样的，而在这里我们可以看到三个输出并不是完全相同。其实在JS中this指向的是执行上下文，什么是执行上下文呢，通俗来说也就是执行这个函数的对象。像第一次执行执行的对象是全局Window，而第二次执行是ObjectB，第三次执行也是全局Window。根据这个原理，我们只要改变执行函数的对象就能改变this的指向。执行函数的方式有以下方式：</p>
+<ul>
+<li>直接调用</li>
+<li>作为对象的方法调用</li>
+<li>call和apply方法</li>
+<li>bind方法</li>
+<li>还有一个不太确定的就是箭头函数</li>
+</ul>
+<p>直接调用和作为对象方法调用改变this指向在上个例子已经展示出来了，接下来着重介绍call、apply和bind方法，为何方便辨识对象下面定义类都使用构造函数的方法定义。<br>测试代码如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs bash">var getThis = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    console.log(this)<br>&#125;<br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">ObjectA</span></span>() &#123;&#125;<br>objectA = new ObjectA()<br><br>// 直接执行时getThis的this指向<br>console.log(<span class="hljs-string">"直接执行时getThis的this指向"</span>)<br>getThis()<br><br>// call方法改变getThis中this的指向<br>console.log(<span class="hljs-string">"call方法改变getThis中this的指向"</span>)<br>getThis.call(objectA)<br><br>// apply方法改变getThis中this的指向<br>console.log(<span class="hljs-string">"apply方法改变getThis中this的指向"</span>)<br>getThis.apply(objectA)<br><br>// <span class="hljs-built_in">bind</span>方法改变getThis中this的指向<br>console.log(<span class="hljs-string">"bind方法改变getThis中this的指向"</span>)<br>var newGetThis = getThis.bind(objectA)<br>newGetThis()<br></code></pre></td></tr></table></figure>
+<p>执行结果如下<br><img src="https://img-blog.csdn.net/20170918003524280?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMTcwMDQzMjc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+<p>可以看出通过call，apply和bind方法可以轻松改变函数中this的指向。</p>
+<p>还有就是箭头函数，相对与普通函数来说，箭头函数this的指向一定是声明他的对象，那么相对与普通函数来说，应该改变的却没有改变，那究竟算不算改变了指向呢？如果是面试的话可以跟面试官讨论一下，就从我的面试来说，面试官是不同一箭头函数改变this指向这种说法的。箭头函数跟普通函数this指向的测试如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">var ObjectA = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    this.getThis = () =&gt; &#123;<br>        console.log(this)<br>    &#125;<br>    this.otherGetThis = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>        console.log(this)<br>    &#125;<br>&#125;<br>var objectA = new ObjectA()<br>var getThis = objectA.getThis<br>console.log(<span class="hljs-string">"箭头函数this指向"</span>)<br>getThis()<br>var otherGetThis = objectA.otherGetThis<br>console.log(<span class="hljs-string">"普通函数this指向"</span>)<br>otherGetThis()<br></code></pre></td></tr></table></figure>
+<p>运行结果如下</p>
+<p><img src="https://img-blog.csdn.net/20170918011444555?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMTcwMDQzMjc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+<p>可以看到箭头函数的指向是没有改变的还是指向ObjectA而普通函数this指向了调用它的全局Window</p>
+<hr>
+<h2 id="类型检测"><a href="#类型检测" class="headerlink" title="类型检测"></a>类型检测</h2><p> 在面试过程中，面试官有问到关于JS类型检测的问题，之前也没有考虑过这个问题，就答了一个 instanceof 运算符，然后面试官接着就问除了 instanceof 呢或者是 instanceof 有什么缺陷。当时就没想起来，其实在JS中有 instanceof 和 typeof 两个关于类型检测的运算符，在《JavaScript高级程序设计》中有这种说法：当检测的是基础类型的时候使用 typeof 更好，而当检测的是引用类型的时候使用 instanceof 更好。为什么会有这种说法呢，我们可以看一下测试代码</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">var ObjectA = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;&#125;<br>var objectA = new ObjectA()<br>console.log(<span class="hljs-string">"获取objectA的类型"</span>)<br>console.log(typeof objectA)<br>console.log(<span class="hljs-string">"判断objectA是否为Object的引用"</span>)<br>console.log(objectA instanceof Object)<br>console.log(<span class="hljs-string">"判断objectA是否为ObjectA的引用"</span>)<br>console.log(objectA instanceof ObjectA)<br><br>var num = 1<br>console.log(<span class="hljs-string">"判断num的类型"</span>)<br>console.log(typeof num)<br>console.log(<span class="hljs-string">"判断num是否为Number的引用"</span>)<br>console.log(num instanceof Number)<br><br>num = new Number(1)<br>console.log(<span class="hljs-string">"判断重新赋值的num的类型"</span>)<br>console.log(typeof num)<br>console.log(<span class="hljs-string">"判断重新赋值的num是否为Number的引用"</span>)<br>console.log(num instanceof Number)<br></code></pre></td></tr></table></figure>
+<p>输出的结果如图所示<br><img src="https://img-blog.csdn.net/20170918113623525?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMTcwMDQzMjc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+<p>我们可以看到使用 typeof 运算精度只能是基础类型也就是 number ， string ， undefined ， boolean ， object ，要注意的是 null 和数组使用 typeof 运算符得到的也是 object 而 instanceof 运算符可以精确到是哪一种类型的引用例如测试程序中的ObjectA，但 instanceof 也有一个缺陷就是对于直接赋值的数字，字符串，布尔值以及数组是不能将其识别为Number，String，Boolean，Array。这时候怎么将两者的优势结合起来让直接赋值的数字，字符串，布尔值和数组能直接获取到正确的类型呢？我主要是从loadash的源码中获取灵感的，我们可以使用Symbol.toStringTag的方法获取各种类型的tag，其中Number类型的tag为[object,Number]，以此类推。而自定义的属性可一通过重写get[Symbol.toStringTag]来自定义tag，测试的代码入下<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash">class ObjectA &#123;<br>    get [Symbol.toStringTag]() &#123;<br>      <span class="hljs-built_in">return</span> <span class="hljs-string">"ObjectA"</span>;<br>    &#125;<br>&#125;<br>var objectA = new ObjectA()<br>console.log(<span class="hljs-string">"获取自定义类型的类型"</span>)<br>console.log(Object.prototype.toString.call(objectA))<br>var num = 1<br>console.log(<span class="hljs-string">"获取普通类型的对应的类型"</span>)<br>console.log(Object.prototype.toString.call(num))<br>num = new Number(1)<br>console.log(<span class="hljs-string">"获取引用类型的类型"</span>)<br>console.log(Object.prototype.toString.call(num))<br></code></pre></td></tr></table></figure></p>
+<p>运行结果如下图所示<br><img src="https://img-blog.csdn.net/20170918145149725?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvcXFfMTcwMDQzMjc=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+<p>通过这种方法无论是直接赋值还是构造函数赋值，无论是内置类型还是自定义类型都能够识别，相对来说是比较通用的解决办法。</p>
+<hr>
+<h2 id="es6"><a href="#es6" class="headerlink" title="es6"></a>es6</h2><p> 我觉得现在前端的面试是肯定会问到的，所以在面试前特意复习了一下，然而到了面试的时候面试官问的关于es6的东西几乎都没有答上。面试官主要问了两个问题，es6新增了哪些数据类型；你使用过es6哪些新特性。<br>es6仅仅新增了一个数据类型那就是Symbol，关于Symbol的详细介绍可以参考 阮一峰的es6入门教程 。<br>至于es6的新特性那就多了，在这里列出常用的几种:<br><strong>数据解构，class，promise，构造器，Proxy，Reflect，箭头函数</strong>。 </p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#this相关"><span class="toc-text">this相关</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#类型检测"><span class="toc-text">类型检测</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#es6"><span class="toc-text">es6</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/02/js关于作用域，作用域链和闭包的理解/" class="prev">&larr; Prev post js关于作用域，作用域链和闭包的理解</a>
+  
+
+  
+
+  
+    <a href="/2018/07/31/ajax实现原理/" class="next">Next post ajax实现原理 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

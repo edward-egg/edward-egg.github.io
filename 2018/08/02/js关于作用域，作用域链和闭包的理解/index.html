@@ -1,0 +1,427 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="作用域链先来谈谈变量的作用域变量的作用域无非就是两种：全局变量和局部变量。全局作用域：最外层函数定义的变量拥有全局作用域，即对任何内部函数来说，都是可以访问的：
+1234567&lt;script&gt;      var outerVar = " outer"; function fn()&#123; console.log(outervar); &#12...">
+  
+  <title>js关于作用域，作用域链和闭包的理解 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/04/js严格模式与非严格模式/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js严格模式与非严格模式
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/02/this-类型检测-es6/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        this,类型检测,es6
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>js关于作用域，作用域链和闭包的理解</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-02</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="作用域链"><a href="#作用域链" class="headerlink" title="作用域链"></a>作用域链</h2><p>先来谈谈变量的作用域<br>变量的作用域无非就是两种：全局变量和局部变量。<br>全局作用域：<br>最外层函数定义的变量拥有全局作用域，即对任何内部函数来说，都是可以访问的：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>      var outerVar = <span class="hljs-string">"outer"</span>;<br>      <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn</span></span>()&#123;<br>         console.log(outerVar);<br>      &#125;<br>      fn();//result:outer<br>   &lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>局部作用域：<br>和全局作用域相反，局部作用域一般只在固定的代码片段内可访问到，而对于函数外部是无法访问的，最常见的例如函数内部<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>      <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn</span></span>()&#123;<br>         var innerVar = <span class="hljs-string">"inner"</span>;<br>      &#125;<br>      fn();<br>      console.log(innerVar);// ReferenceError: innerVar is not defined<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>需要注意的是，函数内部声明变量的时候，一定要使用var命令。如果不用的话，你实际上声明了一个全局变量！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn</span></span>()&#123;<br>      innerVar = <span class="hljs-string">"inner"</span>;<br>   &#125;<br>   fn();<br>   console.log(innerVar);// result:inner<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>再来看一个代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   var scope = <span class="hljs-string">"global"</span>;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn</span></span>()&#123;<br>      console.log(scope);//result:undefined<br>      var scope = <span class="hljs-string">"local"</span>;<br>      console.log(scope);//result:<span class="hljs-built_in">local</span>;<br>   &#125;<br>   fn();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>很有趣吧，第一个输出居然是undefined，原本以为它会访问外部的全局变量(scope=”global”)，但是并没有。这可以算是javascript的一个特点，只要函数内定义了一个局部变量，函数在解析的时候都会将这个变量“提前声明”：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   var scope = <span class="hljs-string">"global"</span>;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn</span></span>()&#123;<br>      var scope;//提前声明了局部变量<br>      console.log(scope);//result:undefined<br>      scope = <span class="hljs-string">"local"</span>;<br>      console.log(scope);//result:<span class="hljs-built_in">local</span>;<br>   &#125;<br>   fn();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>然而，也不能因此草率地将局部作用域定义为：用var声明的变量作用范围起止于花括号之间。<br>javascript并没有块级作用域<br>那什么是块级作用域？<br>像在C/C++中，花括号内中的每一段代码都具有各自的作用域，而且变量在声明它们的代码段之外是不可见的，比如下面的c语言代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">for</span>(int i = 0; i &lt; 10; i++)&#123;<br>//i的作用范围只在这个<span class="hljs-keyword">for</span>循环<br>&#125;<br><span class="hljs-built_in">printf</span>(<span class="hljs-string">"%d"</span>,&amp;i);//error<br></code></pre></td></tr></table></figure></p>
+<p>但是javascript不同，并没有所谓的块级作用域，javascript的作用域是相对函数而言的，可以称为函数作用域：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>    <span class="hljs-keyword">for</span>(var i = 1; i &lt; 10; i++)&#123;<br>          //coding<br>    &#125;<br>    console.log(i); //10  <br> &lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<h2 id="作用域链（scope-chain）"><a href="#作用域链（scope-chain）" class="headerlink" title="作用域链（scope chain）"></a>作用域链（scope chain）</h2><p>根据在内部函数可以访问外部函数变量的这种机制，用链式查找决定哪些数据能被内部函数访问。<br>想要知道js怎么链式查找，就得先了解js的执行环境</p>
+<h3 id="执行环境（execution-context）"><a href="#执行环境（execution-context）" class="headerlink" title="执行环境（execution context）"></a>执行环境（execution context）</h3><p>每个函数运行时都会产生一个执行环境，而这个执行环境怎么表示呢？js为每一个执行环境关联了一个变量对象。环境中定义的所有变量和函数都保存在这个对象中。<br>全局执行环境是最外围的执行环境，全局执行环境被认为是window对象，因此所有的全局变量和函数都作为window对象的属性和方法创建的。<br>js的执行顺序是根据函数的调用来决定的，当一个函数被调用时，该函数环境的变量对象就被压入一个环境栈中。而在函数执行之后，栈将该函数的变量对象弹出，把控制权交给之前的执行环境变量对象。<br>举个例子：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   var scope = <span class="hljs-string">"global"</span>; <br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn1</span></span>()&#123;<br>      <span class="hljs-built_in">return</span> scope; <br>   &#125;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fn2</span></span>()&#123;<br>      <span class="hljs-built_in">return</span> scope;<br>   &#125;<br>   fn1();<br>   fn2();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>上面代码执行情况演示： </p>
+<p><img src="https://img-blog.csdn.net/20170429211440774" alt></p>
+<p>了解了环境变量，再详细讲讲作用域链。<br>当某个函数第一次被调用时，就会创建一个执行环境(execution context)以及相应的作用域链，并把作用域链赋值给一个特殊的内部属性([scope])。然后使用this，arguments(arguments在全局环境中不存在)和其他命名参数的值来初始化函数的活动对象(activation object)。当前执行环境的变量对象始终在作用域链的第0位。<br>以上面的代码为例，当第一次调用fn1()时的作用域链如下图所示：<br>（因为fn2()还没有被调用，所以没有fn2的执行环境） </p>
+<p><img src="https://img-blog.csdn.net/20170430104545087" alt></p>
+<p>可以看到fn1活动对象里并没有scope变量，于是沿着作用域链(scope chain)向后寻找，结果在全局变量对象里找到了scope，所以就返回全局变量对象里的scope值。</p>
+<blockquote>
+<p>标识符解析是沿着作用域链一级一级地搜索标识符地过程。搜索过程始终从作用域链地前端开始，然后逐级向后回溯，直到找到标识符为止（如果找不到标识符，通常会导致错误发生）—-《JavaScript高级程序设计》</p>
+</blockquote>
+<p>那作用域链地作用仅仅只是为了搜索标识符吗？<br>再来看一段代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">outer</span></span>()&#123;<br>      var scope = <span class="hljs-string">"outer"</span>;<br>      <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">inner</span></span>()&#123;<br>         <span class="hljs-built_in">return</span> scope;<br>      &#125;<br>      <span class="hljs-built_in">return</span> inner;<br>   &#125;<br>   var fn = outer();<br>   fn();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>outer()内部返回了一个inner函数，当调用outer时，inner函数的作用域链就已经被初始化了（复制父函数的作用域链，再在前端插入自己的活动对象），具体如下图：<br><img src="https://img-blog.csdn.net/20170430112410039" alt></p>
+<p>一般来说，当某个环境中的所有代码执行完毕后，该环境被销毁（弹出环境栈），保存在其中的所有变量和函数也随之销毁（全局执行环境变量直到应用程序退出，如网页关闭才会被销毁）<br>但是像上面那种有内部函数的又有所不同，当outer()函数执行结束，执行环境被销毁，但是其关联的活动对象并没有随之销毁，而是一直存在于内存中，因为该活动对象被其内部函数的作用域链所引用。<br>具体如下图：<br>outer执行结束，内部函数开始被调用<br>outer执行环境等待被回收，outer的作用域链对全局变量对象和outer的活动对象引用都断了</p>
+<p><img src="https://img-blog.csdn.net/20170430115351877" alt></p>
+<p>像上面这种内部函数的作用域链仍然保持着对父函数活动对象的引用，就是闭包(closure)</p>
+<h2 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h2><p>闭包有两个作用：<br>第一个就是可以读取自身函数外部的变量（沿着作用域链寻找）<br>第二个就是让这些外部变量始终保存在内存中<br>关于第二点，来看一下以下的代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">outer</span></span>()&#123;<br>      var result = new Array();<br>      <span class="hljs-keyword">for</span>(var i = 0; i &lt; 2; i++)&#123;//注：i是outer()的局部变量<br>         result[i] = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>            <span class="hljs-built_in">return</span> i;<br>         &#125;<br>      &#125;<br>      <span class="hljs-built_in">return</span> result;//返回一个函数对象数组<br>      //这个时候会初始化result.length个关于内部函数的作用域链<br>   &#125;<br>   var fn = outer();<br>   console.log(fn[0]());//result：2<br>   console.log(fn[1]());//result：2<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>返回结果很出乎意料吧，你肯定以为依次返回0，1，但事实并非如此<br>来看一下调用fn<a href>0</a>的作用域链图： </p>
+<p><img src="https://img-blog.csdn.net/20170430122035791" alt></p>
+<p>可以看到result[0]函数的活动对象里并没有定义i这个变量，于是沿着作用域链去找i变量，结果在父函数outer的活动对象里找到变量i(值为2)，而这个变量i是父函数执行结束后将最终值保存在内存里的结果。<br>由此也可以得出，js函数内的变量值不是在编译的时候就确定的，而是等在运行时期再去寻找的。</p>
+<p>那怎么才能让result数组函数返回我们所期望的值呢？<br>看一下result的活动对象里有一个arguments，arguments对象是一个参数的集合，是用来保存对象的。<br>那么我们就可以把i当成参数传进去，这样一调用函数生成的活动对象内的arguments就有当前i的副本。<br>改进之后：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">outer</span></span>()&#123;<br>      var result = new Array();<br>      <span class="hljs-keyword">for</span>(var i = 0; i &lt; 2; i++)&#123;<br>         //定义一个带参函数<br>         <span class="hljs-keyword">function</span> arg(num)&#123;<br>            <span class="hljs-built_in">return</span> num;<br>         &#125;<br>         //把i当成参数传进去<br>         result[i] = arg(i);<br>      &#125;<br>      <span class="hljs-built_in">return</span> result;<br>   &#125;<br>   var fn = outer();<br>   console.log(fn[0]);//result:0<br>   console.log(fn[1]);//result:1<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>虽然的到了期望的结果，但是又有人问这算闭包吗？调用内部函数的时候，父函数的环境变量还没被销毁呢，而且result返回的是一个整型数组，而不是一个函数数组！<br>确实如此，那就让arg(num)函数内部再定义一个内部函数就好了：<br>这样result返回的其实是innerarg()函数</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>   <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">outer</span></span>()&#123;<br>      var result = new Array();<br>      <span class="hljs-keyword">for</span>(var i = 0; i &lt; 2; i++)&#123;<br>         //定义一个带参函数<br>         <span class="hljs-keyword">function</span> arg(num)&#123;<br>            <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">innerarg</span></span>()&#123;<br>               <span class="hljs-built_in">return</span> num;<br>            &#125;<br>            <span class="hljs-built_in">return</span> innerarg;<br>         &#125;<br>         //把i当成参数传进去<br>         result[i] = arg(i);<br>      &#125;<br>      <span class="hljs-built_in">return</span> result;<br>   &#125;<br>   var fn = outer();<br>   console.log(fn[0]());<br>   console.log(fn[1]());<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p>当调用outer，for循环内i=0时的作用域链图如下：<br><img src="https://img-blog.csdn.net/20170430160650039" alt></p>
+<p>由上图可知，当调用innerarg()时，它会沿作用域链找到父函数arg()活动对象里的arguments参数num=0.<br>上面代码中，函数arg在outer函数内预先被调用执行了，对于这种方法，js有一种简洁的写法</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">outer</span></span>()&#123;<br>     var result = new Array();<br>     <span class="hljs-keyword">for</span>(var i = 0; i &lt; 2; i++)&#123;<br>        //定义一个带参函数<br>        result[i] = <span class="hljs-keyword">function</span>(num)&#123;<br>           <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">innerarg</span></span>()&#123;<br>              <span class="hljs-built_in">return</span> num;<br>           &#125;<br>           <span class="hljs-built_in">return</span> innerarg;<br>        &#125;(i);//预先执行函数写法<br>        //把i当成参数传进去<br>     &#125;<br>     <span class="hljs-built_in">return</span> result;<br>  &#125;<br></code></pre></td></tr></table></figure>
+<h2 id="关于this对象"><a href="#关于this对象" class="headerlink" title="关于this对象"></a>关于this对象</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">　　var name = <span class="hljs-string">"The Window"</span>;<br>　　var object = &#123;<br>　　　　name : <span class="hljs-string">"My Object"</span>,<br>　　　　getNameFunc : <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>　　　　　　<span class="hljs-built_in">return</span> <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>　　　　　　　　<span class="hljs-built_in">return</span> this.name;<br>　　　　　　&#125;;<br>　　　　&#125;<br>　　&#125;;<br>　　alert(object.getNameFunc()());//result:The Window<br></code></pre></td></tr></table></figure>
+<p>《javascript高级程序设计》一书给出的解释是：</p>
+<blockquote>
+<p>this对象是在运行时基于函数的执行环境绑定的：在全局函数中，this等于window，而当函数被作为某个对象调用时，this等于那个对象。不过，匿名函数具有全局性，因此this对象同常指向window</p>
+</blockquote>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#作用域链"><span class="toc-text">作用域链</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#作用域链（scope-chain）"><span class="toc-text">作用域链（scope chain）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#执行环境（execution-context）"><span class="toc-text">执行环境（execution context）</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#闭包"><span class="toc-text">闭包</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关于this对象"><span class="toc-text">关于this对象</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/04/js严格模式与非严格模式/" class="prev">&larr; Prev post js严格模式与非严格模式</a>
+  
+
+  
+
+  
+    <a href="/2018/08/02/this-类型检测-es6/" class="next">Next post this,类型检测,es6 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

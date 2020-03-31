@@ -1,0 +1,410 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="vdom是vue和React的核心。
+vdom是什么？为何会存在vdom?    vdom如何应用，核心API是什么
+vdom是什么？虚拟DOM，用JS模拟DOM结构。DOM变化的对比，放在JS层来做（图灵完备语言）。提高重绘性能。
+什么是图灵完备语言？就是可以实现逻辑、判断、算法的语言。
+什么是vdom?这是一个真实的DOM
+1234&lt;ul id=" list"&gt; &lt;...">
+  
+  <title>虚拟dom实现 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/10/03/js实现前端路由/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js实现前端路由
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/09/07/js继承方法总结/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js继承方法总结
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>虚拟dom实现</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-09-29</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/VUE/">VUE</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/VUE/">VUE</a>
+      
+      </span>
+      
+    </p>
+    
+    <p>vdom是vue和React的核心。</p>
+<p>vdom是什么？为何会存在vdom?<br>    vdom如何应用，核心API是什么</p>
+<h1 id="vdom是什么？"><a href="#vdom是什么？" class="headerlink" title="vdom是什么？"></a>vdom是什么？</h1><p>虚拟DOM，用JS模拟DOM结构。DOM变化的对比，放在JS层来做（图灵完备语言）。提高重绘性能。</p>
+<h2 id="什么是图灵完备语言？"><a href="#什么是图灵完备语言？" class="headerlink" title="什么是图灵完备语言？"></a>什么是图灵完备语言？</h2><p>就是可以实现逻辑、判断、算法的语言。</p>
+<h2 id="什么是vdom"><a href="#什么是vdom" class="headerlink" title="什么是vdom?"></a>什么是vdom?</h2><p>这是一个真实的DOM</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;ul id=<span class="hljs-string">"list"</span>&gt;<br>    &lt;li class=<span class="hljs-string">"item"</span>&gt;Item 1&lt;/li&gt;<br>    &lt;li class=<span class="hljs-string">"item"</span>&gt;Item 2&lt;/li&gt;<br>&lt;/ul&gt;<br></code></pre></td></tr></table></figure>
+<p>用js模拟上面的dom如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">  &#123;<br>    tag: <span class="hljs-string">'ul'</span>,<br>    attrs: &#123;<br>        id: <span class="hljs-string">'list'</span><br>    &#125;,<br>    children: [<br>        &#123;<br>            tag: <span class="hljs-string">'li'</span>,<br>            attrs: &#123;className: <span class="hljs-string">'item'</span>&#125;,      //class是JS保留字，所以这里使用className<br>            children: [<span class="hljs-string">'Item 1'</span>]<br>        &#125;,&#123;<br>            tag: <span class="hljs-string">'li'</span>,<br>            attrs: &#123;className: <span class="hljs-string">'item'</span>&#125;,<br>            children: [<span class="hljs-string">'Item 2'</span>]<br>        &#125;<br>    ]<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>假设DOM发生了变化，我们在真实的DOM结构中，我们要进行DOM操作。而在虚拟的DOM结构中，我们只需要修改不一样的地方即可。为什么这样做，因为浏览器在进行DOM操作的时候消耗很大，而进行JS操作，操作很多次也没什么关系。DOM操作是最昂贵的，现在浏览器执行JS速度非常快。所以说用虚拟DOM。</p>
+<h2 id="设计场景（为什么会存在vdom）"><a href="#设计场景（为什么会存在vdom）" class="headerlink" title="设计场景（为什么会存在vdom）"></a>设计场景（为什么会存在vdom）</h2><p>将数据展示成一个表格。随便修改一个信息，表格也跟着修改。数据如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash">[<br>    &#123;<br>        name: <span class="hljs-string">'张三'</span>,<br>        age: <span class="hljs-string">'20'</span>,<br>        address: <span class="hljs-string">'北京'</span><br>    &#125;,<br>    &#123;<br>        name: <span class="hljs-string">'李四'</span>,<br>        age: <span class="hljs-string">'21'</span>,<br>        address: <span class="hljs-string">'上海'</span><br>    &#125;,<br>    &#123;<br>        name: <span class="hljs-string">'王五'</span>,<br>        age: <span class="hljs-string">'22'</span>,<br>        address: <span class="hljs-string">'广州'</span><br>    &#125;<br>]<br></code></pre></td></tr></table></figure></p>
+<h3 id="1-JQuery实现"><a href="#1-JQuery实现" class="headerlink" title="1,JQuery实现"></a>1,JQuery实现</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;!DOCTYPE html&gt;<br>&lt;html lang=<span class="hljs-string">"en"</span>&gt;<br>&lt;head&gt;<br>    &lt;meta charset=<span class="hljs-string">"UTF-8"</span>&gt;<br>    &lt;title&gt;Title&lt;/title&gt;<br>    &lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span> src=<span class="hljs-string">"./jquery-1.12.4.min.js"</span>&gt;&lt;/script&gt;<br>&lt;/head&gt;<br>&lt;body&gt;<br>    &lt;div id=<span class="hljs-string">"container"</span>&gt;&lt;/div&gt;<br>    &lt;button id=<span class="hljs-string">"btn-change"</span>&gt;change&lt;/button&gt;<br>    &lt;script&gt;<br>        var data = [<br>            &#123;<br>                name: <span class="hljs-string">'张三'</span>,<br>                age: <span class="hljs-string">'20'</span>,<br>                address: <span class="hljs-string">'北京'</span><br>            &#125;,<br>            &#123;<br>                name: <span class="hljs-string">'李四'</span>,<br>                age: <span class="hljs-string">'21'</span>,<br>                address: <span class="hljs-string">'上海'</span><br>            &#125;,<br>            &#123;<br>                name: <span class="hljs-string">'王五'</span>,<br>                age: <span class="hljs-string">'22'</span>,<br>                address: <span class="hljs-string">'广州'</span><br>            &#125;<br>        ]<br> <br>        <span class="hljs-keyword">function</span> render(data) &#123;<br>            var <span class="hljs-variable">$container</span> = $(<span class="hljs-string">'#container'</span>)<br>            <span class="hljs-variable">$container</span>.html(<span class="hljs-string">''</span>)<br>            var <span class="hljs-variable">$table</span> = $(<span class="hljs-string">'&lt;table&gt;'</span>)<br>            <span class="hljs-variable">$table</span>.append($(<span class="hljs-string">'&lt;tr&gt;&lt;td&gt;name&lt;/td&gt;&lt;td&gt;age&lt;/td&gt;&lt;td&gt;address&lt;/td&gt;&lt;/tr&gt;'</span>))<br>            data.forEach(<span class="hljs-keyword">function</span>(item)&#123;<br>                <span class="hljs-variable">$table</span>.append($(<span class="hljs-string">'&lt;tr&gt;&lt;td&gt;'</span>+ item.name +<span class="hljs-string">'&lt;/td&gt;&lt;td&gt;'</span> + item.age + <span class="hljs-string">'&lt;/td&gt;&lt;td&gt;'</span> + item.address + <span class="hljs-string">'&lt;/td&gt;&lt;/tr&gt;'</span>))<br>            &#125;)<br>            //渲染到页面<br>            <span class="hljs-variable">$container</span>.append(<span class="hljs-variable">$table</span>)<br>        &#125;<br> <br>        $(<span class="hljs-string">'#btn-change'</span>).click(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>            data[1].age = 30<br>            data[2].address = <span class="hljs-string">'深圳'</span><br>            render(data)<br>        &#125;)<br> <br>        render(data)<br>    &lt;/script&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure>
+<h3 id="2-snabbdom实现"><a href="#2-snabbdom实现" class="headerlink" title="2,snabbdom实现"></a>2,snabbdom实现</h3><p><img src="https://img-blog.csdn.net/20180831213914288?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3poYW5naHVhbGkwMjEw/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="snabbdom"></p>
+<p>h函数和pathch函数就是snabbdom的核心API，也就是vdom的核心API。</p>
+<p>h函数就是定义一个虚拟DOM节点。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash">var vnode = h(<span class="hljs-string">'ul#list'</span>, &#123;&#125;, [<br>    h(<span class="hljs-string">'li.item'</span>, &#123;&#125;, <span class="hljs-string">'Item1'</span>),<br>    h(<span class="hljs-string">'li.item'</span>, &#123;&#125;, <span class="hljs-string">'Item2'</span>)<br>])<br> <br> <br>//对应的内容：<br>&#123;<br>    tag: <span class="hljs-string">'ul'</span>,<br>    attrs: &#123;<br>        id: <span class="hljs-string">'list'</span><br>    &#125;,<br>    children: [<br>        &#123;<br>            tag: <span class="hljs-string">'li'</span>,<br>            attrs: &#123;className: <span class="hljs-string">'item'</span>&#125;,<br>            children: [<span class="hljs-string">'Item 1'</span>]<br>        &#125;,&#123;<br>            tag: <span class="hljs-string">'li'</span>,<br>            attrs: &#123;className: <span class="hljs-string">'item'</span>&#125;,<br>            children: [<span class="hljs-string">'Item 2'</span>]<br>        &#125;<br>    ]<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>patch函数<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">patch(container, vnode) //第一次渲染，container是一个真实的DOM节点，vnode是虚拟的DOM，将vnode放入到container中。<br>patch(vnode, newVnode)  //DOM有所改变时，将新的newVnode渲染到vnode中，这个过程中将进行复杂的对比，只修改不同的地方<br></code></pre></td></tr></table></figure></p>
+<p>例子：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;!DOCTYPE html&gt;<br>&lt;html lang=<span class="hljs-string">"en"</span>&gt;<br>&lt;head&gt;<br>    &lt;meta charset=<span class="hljs-string">"UTF-8"</span>&gt;<br>    &lt;title&gt;Title&lt;/title&gt;<br>&lt;/head&gt;<br>&lt;body&gt;<br>&lt;div id=<span class="hljs-string">"container"</span>&gt;&lt;/div&gt;<br>&lt;button id=<span class="hljs-string">"btn-change"</span>&gt;change&lt;/button&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/snabbdom.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/snabbdom-class.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/snabbdom-props.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/snabbdom-style.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/snabbdom-eventlisteners.js"</span>&gt;&lt;/script&gt;<br>&lt;script src=<span class="hljs-string">"https://cdn.bootcss.com/snabbdom/0.7.1/h.js"</span>&gt;&lt;/script&gt;<br>&lt;script&gt;<br>    var snabbdom = window.snabbdom<br>    var patch = snabbdom.init([<br>            snabbdom_class,<br>            snabbdom_props,<br>            snabbdom_style,<br>            snabbdom_eventlisteners<br>        ])<br>    var h = snabbdom.h<br>    var data = [<br>            &#123;<br>                name: <span class="hljs-string">'张三'</span>,<br>                age: <span class="hljs-string">'20'</span>,<br>                address: <span class="hljs-string">'北京'</span><br>            &#125;,<br>            &#123;<br>                name: <span class="hljs-string">'李四'</span>,<br>                age: <span class="hljs-string">'21'</span>,<br>                address: <span class="hljs-string">'上海'</span><br>            &#125;,<br>            &#123;<br>                name: <span class="hljs-string">'王五'</span>,<br>                age: <span class="hljs-string">'22'</span>,<br>                address: <span class="hljs-string">'广州'</span><br>            &#125;<br>        ]<br>        //把表头也放在data中<br>         data.unshift(&#123;<br>             name:<span class="hljs-string">'姓名'</span>,<br>             age: <span class="hljs-string">'年龄'</span>,<br>             address: <span class="hljs-string">'地址'</span><br>         &#125;)<br>         var container = document.getElementById(<span class="hljs-string">'container'</span>)<br>         //渲染函数<br>         var vnode<br>         <span class="hljs-keyword">function</span> render(data)&#123;<br>            var newVnode = h(<span class="hljs-string">'table'</span>,&#123;&#125;, data.map(<span class="hljs-keyword">function</span>(item)&#123;<br>                var tds = []<br>                var i<br>                <span class="hljs-keyword">for</span>(i <span class="hljs-keyword">in</span> item)&#123;<br>                    <span class="hljs-keyword">if</span>(item.hasOwnProperty(i))&#123;<br>                        tds.push(h(<span class="hljs-string">'td'</span>, &#123;&#125;, item[i] + <span class="hljs-string">''</span>))<br>                    &#125;<br>                &#125;<br>                <span class="hljs-built_in">return</span> h(<span class="hljs-string">'tr'</span>,&#123;&#125;,tds)<br>            &#125;))<br>             <span class="hljs-keyword">if</span>(vnode) &#123;<br>                patch(vnode, newVnode)<br>             &#125; <span class="hljs-keyword">else</span> &#123;<br>                patch(container, newVnode)<br>             &#125;<br>             vnode = newVnode<br>         &#125;<br>         render(data)<br> <br>         var btnChange = document.getElementById(<span class="hljs-string">'btn-change'</span>)<br>         btnChange.addEventListener(<span class="hljs-string">'click'</span>, <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>             data[1].age = 30<br>             data[2].address = <span class="hljs-string">'深圳'</span><br>             render(data)<br>         &#125;)<br> &lt;/script&gt;<br>&lt;/body&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure></p>
+<h3 id="原生js表示"><a href="#原生js表示" class="headerlink" title="原生js表示"></a>原生js表示</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs bash">//虚拟dom，参数分别为标签名、属性对象、子DOM列表<br>var VElement = <span class="hljs-keyword">function</span>(tagName, props, children) &#123;<br>    //保证只能通过如下方式调用：new VElement<br>    <span class="hljs-keyword">if</span> (!(this instanceof VElement)) &#123;<br>        <span class="hljs-built_in">return</span> new VElement(tagName, props, children);<br>    &#125;<br> <br>    //可以通过只传递tagName和children参数<br>    <span class="hljs-keyword">if</span> (util.isArray(props)) &#123;<br>        children = props;<br>        props = &#123;&#125;;<br>    &#125;<br> <br>    //设置虚拟dom的相关属性<br>    this.tagName = tagName;<br>    this.props = props || &#123;&#125;;<br>    this.children = children || [];<br>    this.key = props ? props.key : void 666;<br>    var count = 0;<br>    util.each(this.children, <span class="hljs-keyword">function</span>(child, i) &#123;<br>        <span class="hljs-keyword">if</span> (child instanceof VElement) &#123;<br>            count += child.count;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            children[i] = <span class="hljs-string">''</span> + child;<br>        &#125;<br>        count++;<br>    &#125;);<br>    this.count = count;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>通过VElement，我们可以很简单地用javascript表示DOM结构。比如<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">var vdom = velement(<span class="hljs-string">'div'</span>, &#123; <span class="hljs-string">'id'</span>: <span class="hljs-string">'container'</span> &#125;, [<br>    velement(<span class="hljs-string">'h1'</span>, &#123; style: <span class="hljs-string">'color:red'</span> &#125;, [<span class="hljs-string">'simple virtual dom'</span>]),<br>    velement(<span class="hljs-string">'p'</span>, [<span class="hljs-string">'hello world'</span>]),<br>    velement(<span class="hljs-string">'ul'</span>, [velement(<span class="hljs-string">'li'</span>, [<span class="hljs-string">'item #1'</span>]), velement(<span class="hljs-string">'li'</span>, [<span class="hljs-string">'item #2'</span>])]),<br>]);<br></code></pre></td></tr></table></figure></p>
+<p>上面的javascript代码可以表示如下DOM结构：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;div id=<span class="hljs-string">"container"</span>&gt;<br>    &lt;h1 style=<span class="hljs-string">"color:red"</span>&gt;simple virtual dom&lt;/h1&gt;<br>    &lt;p&gt;hello world&lt;/p&gt;<br>    &lt;ul&gt;<br>        &lt;li&gt;item <span class="hljs-comment">#1&lt;/li&gt;</span><br>        &lt;li&gt;item <span class="hljs-comment">#2&lt;/li&gt;</span><br>    &lt;/ul&gt;   <br>&lt;/div&gt;<br></code></pre></td></tr></table></figure></p>
+<p>同样我们可以很方便地根据虚拟DOM树构建出真实的DOM树。具体思路：根据虚拟DOM节点的属性和子节点递归地构建出真实的DOM树。见如下代码：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs bash">VElement.prototype.render = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    //创建标签<br>    var el = document.createElement(this.tagName);<br>    //设置标签的属性<br>    var props = this.props;<br>    <span class="hljs-keyword">for</span> (var propName <span class="hljs-keyword">in</span> props) &#123;<br>        var propValue = props[propName]<br>        util.setAttr(el, propName, propValue);<br>    &#125;<br> <br>    //依次创建子节点的标签<br>    util.each(this.children, <span class="hljs-keyword">function</span>(child) &#123;<br>        //如果子节点仍然为velement，则递归的创建子节点，否则直接创建文本类型节点<br>        var childEl = (child instanceof VElement) ? child.render() : document.createTextNode(child);<br>        el.appendChild(childEl);<br>    &#125;);<br> <br>    <span class="hljs-built_in">return</span> el;<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>对一个虚拟的DOM对象VElement，调用其原型的render方法，就可以产生一颗真实的DOM树。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">vdom.render();<br></code></pre></td></tr></table></figure></p>
+<hr>
+<p>本文来自 zhanghuali2019 的CSDN 博客 ，全文地址请点击：<a href="https://blog.csdn.net/zhanghuali0210/article/details/82261798?utm_source=copy" target="_blank" rel="noopener">https://blog.csdn.net/zhanghuali0210/article/details/82261798?utm_source=copy</a> </p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#vdom是什么？"><span class="toc-text">vdom是什么？</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是图灵完备语言？"><span class="toc-text">什么是图灵完备语言？</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#什么是vdom"><span class="toc-text">什么是vdom?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设计场景（为什么会存在vdom）"><span class="toc-text">设计场景（为什么会存在vdom）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-JQuery实现"><span class="toc-text">1,JQuery实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-snabbdom实现"><span class="toc-text">2,snabbdom实现</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#原生js表示"><span class="toc-text">原生js表示</span></a></li></ol></li></ol></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/10/03/js实现前端路由/" class="prev">&larr; Prev post js实现前端路由</a>
+  
+
+  
+
+  
+    <a href="/2018/09/07/js继承方法总结/" class="next">Next post js继承方法总结 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

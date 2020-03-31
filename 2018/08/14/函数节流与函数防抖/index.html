@@ -1,0 +1,397 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="有些浏览器事件会被用户在很短的时间内触发很多次，例如点击事件或滚动页面。如果你给窗口滚动事件添加一个事件监听函数（事件句柄），然后用户不停地快速上下滚动页面，那你的事件可能在一秒之内都会被触发很多次，这会导致严重的性能问题，比如说你的页面卡住了（假死），所以我们需要降低触发回调的频率。下面就说一下优化这种高频执行js的方法，来提高页面速度和性能。
+Throttling(节流)相信很多人都用过...">
+  
+  <title>函数节流与函数防抖 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/15/WebSocket/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        WebSocket
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/13/8种方式实现跨域请求/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        8种方式实现跨域请求
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>函数节流与函数防抖</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-14</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <p>有些浏览器事件会被用户在很短的时间内触发很多次，例如点击事件或滚动页面。如果你给窗口滚动事件添加一个事件监听函数（事件句柄），然后用户不停地快速上下滚动页面，那你的事件可能在一秒之内都会被触发很多次，这会导致严重的性能问题，比如说你的页面卡住了（假死），所以我们需要降低触发回调的频率。<br>下面就说一下优化这种高频执行js的方法，来提高页面速度和性能。</p>
+<h2 id="Throttling-节流"><a href="#Throttling-节流" class="headerlink" title="Throttling(节流)"></a>Throttling(节流)</h2><p>相信很多人都用过两个事件：onresize跟onscroll，这两个事件一个在页面放大缩小时触发一个在页面滚动时触发，一般情况下伴随着这两个事件的肯定是DOM节点的定位啊，scrollTop距离的检测啊之类的操作，回到最初的问题，都说了DOM操作是很昂贵的你还在每一次onresize跟onscroll事件触发的时候去执行DOM操作，浪费机器性能很好玩么！</p>
+<p>既然发现了问题，那么就要解决问题，解决的办法就是函数节流。函数节流背后的思想很简单：因为onresize跟onscroll这类事件是连续不断的触发的，那么在每次触发的时候我们就开一个定时器，将DOM操作延迟，然后在下一次事件触发的时候，我们把这个定时器给关掉，这样的结果就是onresize事件一路触发的时候，我们开定时器，关定时器，开定时器，关定时器。。。一直等到最后你不执行onresize的操作了，再等待延迟的时间后，最后这个没有被关闭的定时器开始执行回调函数，访问DOM节点。</p>
+<p>对于函数节流，有两种实现的方法：<br>预先设定一个执行周期，当调用动作的时刻大于等于执行周期则执行该动作，然后进入下一个新的时间周期。(设置阈值)<br>1.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> throttle(method , context)&#123;<br>    clearTimeout(method.tId);<br><br>    method.tId=setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        method.call(context);<br>    &#125;,500);<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>2.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> throttle(method , delay)&#123;<br>    var timer=null;<br><br>    <span class="hljs-built_in">return</span> <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        var context = this, <br>            args = arguments;<br>        clearTimeout(timer);<br><br>        timer = setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>            method.apply(context , args);<br>        &#125; , delay);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>实例：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">var canRun = <span class="hljs-literal">true</span>;<br>document.getElementById(<span class="hljs-string">"throttle"</span>).onscroll = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br> <span class="hljs-keyword">if</span>(!canRun)&#123;<br> // 判断是否已空闲，如果在执行中，则直接<span class="hljs-built_in">return</span><br> <span class="hljs-built_in">return</span>;<br> &#125;<br> canRun = <span class="hljs-literal">false</span>;<br> setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br> console.log(<span class="hljs-string">"函数节流"</span>);<br> canRun = <span class="hljs-literal">true</span>;<br> &#125;, 300);<br>&#125;;<br></code></pre></td></tr></table></figure></p>
+<h2 id="Debouncing-防抖"><a href="#Debouncing-防抖" class="headerlink" title="Debouncing(防抖)"></a>Debouncing(防抖)</h2><p>它的做法是限制下次函数调用之前必须等待的时间间隔。<br>函数节流是一个很好用的方案，但假如我并不希望每次都是要事件结束后等待delay的事件后才执行回调，但是又希望减少DOM操作，那该如何处理呢？</p>
+<p>我们先给定一个时间段duration，过了这个时间段以后我们执行相应的操作，如果没有过这个时间段，那么就按照函数节流的思路，开关定时器就行了~<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> throttle(method , duration ，delay )&#123;<br>    var timer = null, <br>        // 记录下开始执行函数的时间<br>        begin = new Date();<br><br>    <span class="hljs-built_in">return</span> <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>        var context = this, <br>            args = arguments, <br>            // 记录下当前时间<br>            current = new Date();<br>        // 函数节流里的思路<br>        clearTimeout(timer);<br><br>        // 记录下的两个时间相减再与duration进行比较<br>        <span class="hljs-keyword">if</span>(current-begin &gt;= duration)&#123;<br>             method.apply(context , args);<br>             begin = current;<br>        &#125;<span class="hljs-keyword">else</span>&#123;  <br>            timer = setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>                method.apply(context , args);<br>            &#125; , delay);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">var timer = <span class="hljs-literal">false</span>;<br>document.getElementById(<span class="hljs-string">"debounce"</span>).onscroll = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br> clearTimeout(timer); // 清除未执行的代码，重置回初始化状态<br> timer = setTimeout(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br> console.log(<span class="hljs-string">"函数防抖"</span>);<br> &#125;, 300);<br>&#125;;<br></code></pre></td></tr></table></figure>
+<p>如果方法多次触发，则把上次记录的延迟执行代码用clearTimeout清掉，重新开始。函数防抖的实现重点，就是巧用setTimeout做缓存池，而且可以轻易地清除待执行的代码。关于清除上次未执行setTimeout：<br>　　setTimeout()函数将返回一个标识符 ID，这个 ID 是唯一的(一般是整数，从1开始，每调用一次 setTimeout() 就加1)。如果需要 setTimeout() 执行的函数或代码尚未执行，我们可以通过 clearTimeout() 函数来取消该执行操作，clearTimeout() 函数需要接收一个参数，这个参数就是 setTimeout() 函数返回的标识符ID。<br>　　当调用动作触发一段时间后，才会执行该动作，若在这段时间间隔内又调用此动作则将重新计算时间间隔。把触发非常频繁的事件合并成一次执行。</p>
+<h2 id="throttle应用场景"><a href="#throttle应用场景" class="headerlink" title="throttle应用场景"></a>throttle应用场景</h2><p>DOM 元素的拖拽功能实现（mousemove）<br>射击游戏的 mousedown/keydown 事件（单位时间只能发射一颗子弹）<br>计算鼠标移动的距离（mousemove）<br>Canvas 模拟画板功能（mousemove）<br>搜索联想（keyup）<br>监听滚动事件判断是否到页面底部自动加载更多：给 scroll 加了 debounce 后，只有用户停止滚动后，才会判断是否到了页面底部；如果是 throttle 的话，只要页面滚动就会间隔一段时间判断一次</p>
+<h2 id="debounce应用场景"><a href="#debounce应用场景" class="headerlink" title="debounce应用场景"></a>debounce应用场景</h2><p>函数去抖有哪些应用场景？哪些时候对于连续的事件响应我们只需要执行一次回调？</p>
+<p>每次 resize/scroll 触发统计事件<br>文本输入的验证（连续输入文字后发送 AJAX 请求进行验证，验证一次就好）</p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Throttling-节流"><span class="toc-text">Throttling(节流)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Debouncing-防抖"><span class="toc-text">Debouncing(防抖)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#throttle应用场景"><span class="toc-text">throttle应用场景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#debounce应用场景"><span class="toc-text">debounce应用场景</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/15/WebSocket/" class="prev">&larr; Prev post WebSocket</a>
+  
+
+  
+
+  
+    <a href="/2018/08/13/8种方式实现跨域请求/" class="next">Next post 8种方式实现跨域请求 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

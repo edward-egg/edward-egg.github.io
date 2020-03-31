@@ -1,0 +1,395 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="一，关于H5缓存技术提到H5缓存我们应该会想到应用缓存(application cache)，只需要在标签上加一个配置，然后编辑对应的index.appcache,就能实现我们的缓存。123456789101112131415CACHE MANIFEST# v1 CACHE:index.htmlcache.htmlstyle.cssimage1.png# Use from network i...">
+  
+  <title>Service Worker [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/20/JS的垃圾回收机制和内存分配/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        JS的垃圾回收机制和内存分配
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/15/WebSocket/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        WebSocket
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>Service Worker</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-16</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/Web/">Web</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/Web/">Web</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="一，关于H5缓存技术"><a href="#一，关于H5缓存技术" class="headerlink" title="一，关于H5缓存技术"></a>一，关于H5缓存技术</h2><p>提到H5缓存我们应该会想到应用缓存(application cache)，只需要在标签上加一个配置<html menifest="index.appcache">，然后编辑对应的index.appcache,就能实现我们的缓存。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">CACHE MANIFEST<br><span class="hljs-comment"># v1 </span><br>CACHE:<br>index.html<br>cache.html<br>style.css<br>image1.png<br><br><span class="hljs-comment"># Use from network if available</span><br>NETWORK:<br>network.html<br><br><span class="hljs-comment"># Fallback content</span><br>FALLBACK:<br>/ fallback.html<br></code></pre></td></tr></table></figure></html></p>
+<p><a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML/Using_the_application_cache" target="_blank" rel="noopener">使用应用缓存(application cache) — MDN</a></p>
+<h2 id="二，使用Service-Worker实现缓存"><a href="#二，使用Service-Worker实现缓存" class="headerlink" title="二，使用Service Worker实现缓存"></a>二，使用Service Worker实现缓存</h2><p><a href="https://developer.mozilla.org/zh-CN/docs/Web/API/Service_Worker_API" target="_blank" rel="noopener">Service_Worker_API</a></p>
+<h3 id="1-什么事service-worker"><a href="#1-什么事service-worker" class="headerlink" title="1.什么事service worker"></a>1.什么事service worker</h3><p>service worker也称服务器工作线程，是浏览器在后台独立网页运行的脚本。我们平常浏览器窗口中跑的页面运行的是主JavaScript线程，DOM和window全局变量都是可以访问的。而Service Worker是走的另外的线程，可以理解为在浏览器背后默默运行的一个线程，脱离浏览器窗体，因此，window以及DOM都是不能访问的，此时我们可以使用self访问全局上下文。</p>
+<h3 id="2-兼容性"><a href="#2-兼容性" class="headerlink" title="2.兼容性"></a>2.兼容性</h3><p>请查看<a href="https://caniuse.com/#feat=serviceworkers" target="_blank" rel="noopener">https://caniuse.com/#feat=serviceworkers</a></p>
+<h3 id="3-使用前提"><a href="#3-使用前提" class="headerlink" title="3.使用前提"></a>3.使用前提</h3><p>使用service worker，传输协议必须为HTTPS。因为service worker中涉及到请求拦截，所以必须使用HTTPS协议来保障安全。如果是本地调试的话，localhost是可以的。</p>
+<h3 id="4-service-worker-的生命周期"><a href="#4-service-worker-的生命周期" class="headerlink" title="4.service worker 的生命周期"></a>4.service worker 的生命周期</h3><p><img src="https://img-blog.csdn.net/20171227141105043?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2NyZWFtaW5nX2NvbG9y/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="生命周期"></p>
+<p>①注册（register）当你的应用未注册过service worker，那么第一步就是注册；<br>②安装（install）,注册完成之后，会触发install,在这一步我们可以进行文件缓存；<br>③响应请求（fetch）,fetch用于拦截用户请求，并响应，返回Promise对象,成功安装service worker后，待用户下次再进入页面，返回已返回的文件。<br>④更新（activate），当网站上当前页面被关闭，旧服务线程被终止。重新打开网页时，新服务工作线程取得控制权后，会触发activate事件。这一步我们可以清楚就版本缓存。</p>
+<h3 id="5-使用"><a href="#5-使用" class="headerlink" title="5.使用"></a>5.使用</h3><p>页面中引用的js文件<br>进行service worker 注册<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">if</span> (<span class="hljs-string">'serviceWorker'</span> <span class="hljs-keyword">in</span> navigator) &#123;<br>  navigator.serviceWorker.register(<span class="hljs-string">'/sw-test/sw.js'</span>, &#123; scope: <span class="hljs-string">'/sw-test/'</span> &#125;).<span class="hljs-keyword">then</span>(<span class="hljs-keyword">function</span>(reg) &#123;<br><br>    <span class="hljs-keyword">if</span>(reg.installing) &#123;<br>      console.log(<span class="hljs-string">'Service worker installing'</span>);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(reg.waiting) &#123;<br>      console.log(<span class="hljs-string">'Service worker installed'</span>);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(reg.active) &#123;<br>      console.log(<span class="hljs-string">'Service worker active'</span>);<br>    &#125;<br><br>  &#125;).catch(<span class="hljs-keyword">function</span>(error) &#123;<br>    // registration failed<br>    console.log(<span class="hljs-string">'Registration failed with '</span> + error);<br>  &#125;);<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<p>service worker文件，sw.js<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs bash">var VERSION = <span class="hljs-string">'v1'</span>;//一个存储空间<br><br>// 缓存<br>self.addEventListener(<span class="hljs-string">'install'</span>, <span class="hljs-keyword">function</span>(event) &#123;<br>  event.waitUntil(<br>    caches.open(VERSION).<span class="hljs-keyword">then</span>(<span class="hljs-keyword">function</span>(cache) &#123;<br>      <span class="hljs-built_in">return</span> cache.addAll([//需要缓存的文件<br>        <span class="hljs-string">'/sw-test/'</span>,<br>        <span class="hljs-string">'/sw-test/index.html'</span>,<br>        <span class="hljs-string">'/sw-test/style.css'</span>,<br>        <span class="hljs-string">'/sw-test/app.js'</span>,<br>        <span class="hljs-string">'/sw-test/image-list.js'</span>,<br>        <span class="hljs-string">'/sw-test/star-wars-logo.jpg'</span>,<br>        <span class="hljs-string">'/sw-test/gallery/bountyHunters.jpg'</span>,<br>        <span class="hljs-string">'/sw-test/gallery/myLittleVader.jpg'</span>,<br>        <span class="hljs-string">'/sw-test/gallery/snowTroopers.jpg'</span><br>      ]);<br>    &#125;)<br>  );<br>&#125;);<br><br>// 缓存更新<br>self.addEventListener(<span class="hljs-string">'activate'</span>, <span class="hljs-keyword">function</span>(event) &#123;<br>  event.waitUntil(<br>    caches.keys().<span class="hljs-keyword">then</span>(<span class="hljs-keyword">function</span>(cacheNames) &#123;<br>      <span class="hljs-built_in">return</span> Promise.all(<br>        cacheNames.map(<span class="hljs-keyword">function</span>(cacheName) &#123;<br>          // 如果当前版本和缓存版本不一致<br>          <span class="hljs-keyword">if</span> (cacheName !== VERSION) &#123;<br>            <span class="hljs-built_in">return</span> caches.delete(cacheName);<br>          &#125;<br>        &#125;)<br>      );<br>    &#125;)<br>  );<br>&#125;);<br><br>// 捕获请求并返回缓存数据<br>self.addEventListener(<span class="hljs-string">'fetch'</span>, <span class="hljs-keyword">function</span>(event) &#123;<br>  event.respondWith(caches.match(event.request).catch(<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    <span class="hljs-built_in">return</span> fetch(event.request);<br>  &#125;).<span class="hljs-keyword">then</span>(<span class="hljs-keyword">function</span>(response) &#123;<br>    caches.open(VERSION).<span class="hljs-keyword">then</span>(<span class="hljs-keyword">function</span>(cache) &#123;<br>      cache.put(event.request, response);<br>    &#125;);<br>    <span class="hljs-built_in">return</span> response.clone();<br>  &#125;).catch(<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    <span class="hljs-built_in">return</span> caches.match(<span class="hljs-string">'/sw-test/gallery/myLittleVader.jpg'</span>);<br>  &#125;));<br>&#125;);<br></code></pre></td></tr></table></figure></p>
+<p>运行demo: <a href="https://mdn.github.io/sw-test/" target="_blank" rel="noopener">https://mdn.github.io/sw-test/</a><br>打开浏览器查看（请使用隐身模式）：<br>选择offline 页面依旧显示正常 </p>
+<p><img src="https://img-blog.csdn.net/20171227150136893?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvc2NyZWFtaW5nX2NvbG9y/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt></p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一，关于H5缓存技术"><span class="toc-text">一，关于H5缓存技术</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，使用Service-Worker实现缓存"><span class="toc-text">二，使用Service Worker实现缓存</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-什么事service-worker"><span class="toc-text">1.什么事service worker</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-兼容性"><span class="toc-text">2.兼容性</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-使用前提"><span class="toc-text">3.使用前提</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-service-worker-的生命周期"><span class="toc-text">4.service worker 的生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-使用"><span class="toc-text">5.使用</span></a></li></ol></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/20/JS的垃圾回收机制和内存分配/" class="prev">&larr; Prev post JS的垃圾回收机制和内存分配</a>
+  
+
+  
+
+  
+    <a href="/2018/08/15/WebSocket/" class="next">Next post WebSocket &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

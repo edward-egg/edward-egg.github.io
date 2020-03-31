@@ -1,0 +1,412 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="一,什么是事件委托那什么叫事件委托呢？它还有一个名字叫事件代理，JavaScript高级程序设计上讲：事件委托就是利用事件冒泡，只指定一个事件处理程序，就可以管理某一类型的所有事件。那这是什么意思呢？网上的各位大牛们讲事件委托基本上都用了同一个例子，就是取快递来解释这个现象。
+有三个同事预计会在周一收到快递。为签收快递，有两种办法：一是三个人在公司门口等快递；二是委托给前台MM代为签收。现实...">
+  
+  <title>js事件委托 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/28/js-Promise/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js Promise
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/26/js的9种数组去重及性能分析/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js的9种数组去重及性能分析
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>js事件委托</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-28</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="一-什么是事件委托"><a href="#一-什么是事件委托" class="headerlink" title="一,什么是事件委托"></a>一,什么是事件委托</h2><p>那什么叫事件委托呢？它还有一个名字叫事件代理，JavaScript高级程序设计上讲：事件委托就是利用事件冒泡，只指定一个事件处理程序，就可以管理某一类型的所有事件。那这是什么意思呢？网上的各位大牛们讲事件委托基本上都用了同一个例子，就是取快递来解释这个现象。</p>
+<p>有三个同事预计会在周一收到快递。为签收快递，有两种办法：一是三个人在公司门口等快递；二是委托给前台MM代为签收。现实当中，我们大都采用委托的方案（公司也不会容忍那么多员工站在门口就为了等快递）。前台MM收到快递后，她会判断收件人是谁，然后按照收件人的要求签收，甚至代为付款。这种方案还有一个优势，那就是即使公司里来了新员工（不管多少），前台MM也会在收到寄给新员工的快递后核实并代为签收。</p>
+<p>这里其实还有2层意思的：</p>
+<p>第一，现在委托前台的同事是可以代为签收的，即程序中的现有的dom节点是有事件的；</p>
+<p>第二，新员工也是可以被前台MM代为签收的，即程序中新添加的dom节点也是有事件的。</p>
+<hr>
+<h2 id="二，为什么要用事件委托"><a href="#二，为什么要用事件委托" class="headerlink" title="二，为什么要用事件委托"></a>二，为什么要用事件委托</h2><p> 一般来说，dom需要有事件处理程序，我们都会直接给它设事件处理程序就好了，那如果是很多的dom需要添加事件处理呢？比如我们有100个li，每个li都有相同的click点击事件，可能我们会用for循环的方法，来遍历所有的li，然后给它们添加事件，那这么做会存在什么影响呢？</p>
+<p>在JavaScript中，添加到页面上的事件处理程序数量将直接关系到页面的整体运行性能，因为需要不断的与dom节点进行交互，访问dom的次数越多，引起浏览器重绘与重排的次数也就越多，就会延长整个页面的交互就绪时间，这就是为什么性能优化的主要思想之一就是减少DOM操作的原因；如果要用事件委托，就会将所有的操作放到js程序里面，与dom的操作就只需要交互一次，这样就能大大的减少与dom的交互次数，提高性能；</p>
+<p>每个函数都是一个对象，是对象就会占用内存，对象越多，内存占用率就越大，自然性能就越差了（内存不够用，是硬伤，哈哈），比如上面的100个li，就要占用100个内存空间，如果是1000个，10000个呢，那只能说呵呵了，如果用事件委托，那么我们就可以只对它的父级（如果只有一个父级）这一个对象进行操作，这样我们就需要一个内存空间就够了，是不是省了很多，自然性能就会更好。</p>
+<hr>
+<h2 id="三，事件委托的原理"><a href="#三，事件委托的原理" class="headerlink" title="三，事件委托的原理"></a>三，事件委托的原理</h2><p>事件委托是利用事件的冒泡原理来实现的，何为事件冒泡呢？就是事件从最深的节点开始，然后逐步向上传播事件，举个例子：页面上有这么一个节点树，div&gt;ul&gt;li&gt;a;比如给最里面的a加一个click点击事件，那么这个事件就会一层一层的往外执行，执行顺序a&gt;li&gt;ul&gt;div，有这样一个机制，那么我们给最外面的div加点击事件，那么里面的ul，li，a做点击事件的时候，都会冒泡到最外层的div上，所以都会触发，这就是事件委托，委托它们父级代为执行事件。</p>
+<hr>
+<h2 id="四，实例"><a href="#四，实例" class="headerlink" title="四，实例"></a>四，实例</h2><p>好处呢：1，提高性能。</p>
+<p>我们可以看一个例子：需要触发每个li来改变他们的背景颜色。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;ul id=<span class="hljs-string">"ul"</span>&gt;<br>  &lt;li&gt;aaaaaaaa&lt;/li&gt;<br>  &lt;li&gt;bbbbbbbb&lt;/li&gt;<br>  &lt;li&gt;cccccccc&lt;/li&gt;<br>&lt;/ul&gt;<br></code></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash">window.onload = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>  var oUl = document.getElementById(<span class="hljs-string">"ul"</span>);<br>  var aLi = oUl.getElementsByTagName(<span class="hljs-string">"li"</span>);<br> <br>  <span class="hljs-keyword">for</span>(var i=0; i&lt;aLi.length; i++)&#123;<br>    aLi[i].onmouseover = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>      this.style.background = <span class="hljs-string">"red"</span>;<br>    &#125;<br>    aLi[i].onmouseout = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>      this.style.background = <span class="hljs-string">""</span>;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这样我们就可以做到li上面添加鼠标事件。</p>
+<p>但是如果说我们可能有很多个li用for循环的话就比较影响性能。</p>
+<p>下面我们可以用事件委托的方式来实现这样的效果。html不变</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs bash">window.onload = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>  var oUl = document.getElementById(<span class="hljs-string">"ul"</span>);<br>  var aLi = oUl.getElementsByTagName(<span class="hljs-string">"li"</span>);<br> <br>/*<br>这里要用到事件源：event 对象，事件源，不管在哪个事件中，只要你操作的那个元素就是事件源。<br>ie：window.event.srcElement<br>标准下:event.target<br>nodeName:找到元素的标签名<br>*/<br>  oUl.onmouseover = <span class="hljs-keyword">function</span>(ev)&#123;<br>    var ev = ev || window.event;<br>    var target = ev.target || ev.srcElement;<br>    //alert(target.innerHTML);<br>    <span class="hljs-keyword">if</span>(target.nodeName.toLowerCase() == <span class="hljs-string">"li"</span>)&#123;<br>    target.style.background = <span class="hljs-string">"red"</span>;<br>    &#125;<br>  &#125;<br>  oUl.onmouseout = <span class="hljs-keyword">function</span>(ev)&#123;<br>    var ev = ev || window.event;<br>    var target = ev.target || ev.srcElement;<br>    //alert(target.innerHTML);<br>    <span class="hljs-keyword">if</span>(target.nodeName.toLowerCase() == <span class="hljs-string">"li"</span>)&#123;<br>    target.style.background = <span class="hljs-string">""</span>;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<p>好处2，新添加的元素还会有之前的事件。</p>
+<p>我们还拿这个例子看，但是我们要做动态的添加li。点击button动态添加li</p>
+<p>如：</p>
+<p>不用事件委托我们会这样做：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;input <span class="hljs-built_in">type</span>=<span class="hljs-string">"button"</span> id=<span class="hljs-string">"btn"</span> /&gt;<br>&lt;ul id=<span class="hljs-string">"ul"</span>&gt;<br>  &lt;li&gt;aaaaaaaa&lt;/li&gt;<br>  &lt;li&gt;bbbbbbbb&lt;/li&gt;<br>  &lt;li&gt;cccccccc&lt;/li&gt;<br>&lt;/ul&gt;<br></code></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs bash">window.onload = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>  var oUl = document.getElementById(<span class="hljs-string">"ul"</span>);<br>  var aLi = oUl.getElementsByTagName(<span class="hljs-string">"li"</span>);<br>  var oBtn = document.getElementById(<span class="hljs-string">"btn"</span>);<br>  var iNow = 4;<br>  <span class="hljs-keyword">for</span>(var i=0; i&lt;aLi.length; i++)&#123;<br>    aLi[i].onmouseover = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>      this.style.background = <span class="hljs-string">"red"</span>;<br>    &#125;<br>    aLi[i].onmouseout = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>      this.style.background = <span class="hljs-string">""</span>;<br>    &#125;<br>  &#125;<br> <br>  oBtn.onclick = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>    iNow ++;<br>    var oLi = document.createElement(<span class="hljs-string">"li"</span>);<br>    oLi.innerHTML = 1111 *iNow;<br>    oUl.appendChild(oLi);<br>  &#125;<br> <br>  <br>&#125;<br></code></pre></td></tr></table></figure>
+<p>这样做我们可以看到点击按钮新加的li上面没有鼠标移入事件来改变他们的背景颜色。</p>
+<p>因为点击添加的时候for循环已经执行完毕。</p>
+<p>那么我们用事件委托的方式来做。就是html不变<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs bash">window.onload = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>  var oUl = document.getElementById(<span class="hljs-string">"ul"</span>);<br>  var aLi = oUl.getElementsByTagName(<span class="hljs-string">"li"</span>);<br>  var oBtn = document.getElementById(<span class="hljs-string">"btn"</span>);<br>  var iNow = 4;<br> <br>  oUl.onmouseover = <span class="hljs-keyword">function</span>(ev)&#123;<br>    var ev = ev || window.event;<br>    var target = ev.target || ev.srcElement;<br>    //alert(target.innerHTML);<br>    <span class="hljs-keyword">if</span>(target.nodeName.toLowerCase() == <span class="hljs-string">"li"</span>)&#123;<br>    target.style.background = <span class="hljs-string">"red"</span>;<br>    &#125;<br>  &#125;<br>  oUl.onmouseout = <span class="hljs-keyword">function</span>(ev)&#123;<br>    var ev = ev || window.event;<br>    var target = ev.target || ev.srcElement;<br>    //alert(target.innerHTML);<br>    <span class="hljs-keyword">if</span>(target.nodeName.toLowerCase() == <span class="hljs-string">"li"</span>)&#123;<br>    target.style.background = <span class="hljs-string">""</span>;<br>    &#125;<br>  &#125;<br>  oBtn.onclick = <span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>    iNow ++;<br>    var oLi = document.createElement(<span class="hljs-string">"li"</span>);<br>    oLi.innerHTML = 1111 *iNow;<br>    oUl.appendChild(oLi);<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure></p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#一-什么是事件委托"><span class="toc-text">一,什么是事件委托</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#二，为什么要用事件委托"><span class="toc-text">二，为什么要用事件委托</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#三，事件委托的原理"><span class="toc-text">三，事件委托的原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#四，实例"><span class="toc-text">四，实例</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/28/js-Promise/" class="prev">&larr; Prev post js Promise</a>
+  
+
+  
+
+  
+    <a href="/2018/07/26/js的9种数组去重及性能分析/" class="next">Next post js的9种数组去重及性能分析 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

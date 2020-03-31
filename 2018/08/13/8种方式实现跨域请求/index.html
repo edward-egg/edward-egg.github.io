@@ -1,0 +1,417 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="浏览器的同源策略​何为同源？只有当 协议 、端口 、和 域名 都相同的页面，则两个页面具有相同的源。只要网站的 协议名protocol、 主机host、 端口号port 这三个中的任意一个不同，网站间的数据请求与传输便构成了跨域调用，会受到同源策略的限制。​ 同源策略限制从一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的关键的安全机制。浏览器的同源策略，...">
+  
+  <title>8种方式实现跨域请求 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/14/函数节流与函数防抖/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        函数节流与函数防抖
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/04/js严格模式与非严格模式/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js严格模式与非严格模式
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>8种方式实现跨域请求</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-13</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/Web/">Web</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/HTML/">HTML</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="浏览器的同源策略"><a href="#浏览器的同源策略" class="headerlink" title="浏览器的同源策略"></a>浏览器的同源策略</h2><p>​何为同源？只有当 <strong>协议</strong> 、<strong>端口</strong> 、和 <strong>域名</strong> 都相同的页面，则两个页面具有相同的源。只要网站的 协议名protocol、 主机host、 端口号port 这三个中的任意一个不同，网站间的数据请求与传输便构成了跨域调用，会受到同源策略的限制。<br>​ 同源策略限制从一个源加载的文档或脚本如何与来自另一个源的资源进行交互。这是一个用于隔离潜在恶意文件的关键的安全机制。浏览器的同源策略，出于防范跨站脚本的攻击，禁止客户端脚本（如 JavaScript）对不同域的服务进行跨站调用（通常指使用XMLHttpRequest请求）。</p>
+<h2 id="跨域请求方式"><a href="#跨域请求方式" class="headerlink" title="跨域请求方式"></a>跨域请求方式</h2><p>解决跨域问题，最简单的莫过于通过 <strong>nginx</strong> 反向代理进行实现，但是其需要在运维层面修改，且有可能请求的资源并不再我们控制范围内（第三方），所以该方式不能作为通用的解决方案，下面阐述了经常用到几种跨域方式：</p>
+<h2 id="方式一：图片或script标签跨域"><a href="#方式一：图片或script标签跨域" class="headerlink" title="方式一：图片或script标签跨域"></a>方式一：图片或script标签跨域</h2><p><strong>图片ping</strong>常用于跟踪用户点击页面或动态广告曝光次数。<br><strong>script标签</strong>可以得到从其他来源数据，这也是JSONP依赖的根据。<br><strong>缺点</strong>：只能发送Get请求 ，无法访问服务器的响应文本（单向请求）</p>
+<h2 id="方式二：JSONP跨域"><a href="#方式二：JSONP跨域" class="headerlink" title="方式二：JSONP跨域"></a>方式二：JSONP跨域</h2><p> JSONP（JSON with Padding）是数据格式JSON的一种“使用模式”，可以让网页从别的网域要数据。根据 XmlHttpRequest 对象受到同源策略的影响，而利用 &lt;script>元素的这个开放策略，网页可以得到从其他来源动态产生的JSON数据，而这种使用模式就是所谓的 JSONP。用JSONP抓到的数据并不是JSON，而是任意的JavaScript，用 JavaScript解释器运行而不是用JSON解析器解析。所有，通过Chrome查看所有JSONP发送的Get请求都是js类型，而非XHR。<br> <img src="https://img-blog.csdn.net/20170611224721413?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvbGlnYW5nMjU4NTExNg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt><br> <strong>缺点</strong></p>
+<ul>
+<li>只能使用Get请求</li>
+<li>不能注册success、error等事件监听函数，不能很容易的确定JSONP请求是否失败</li>
+<li>JSONP是从其他域中加载代码执行，容易受到跨站请求伪造的攻击，其安全性无法确保</li>
+</ul>
+<p>代码实现：<br>1.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span> src=<span class="hljs-string">"https://code.jquery.com/jquery-3.1.0.min.js"</span>&gt;&lt;/script&gt;<br>&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;<br>$(<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>$.ajax(&#123;<br>async: <span class="hljs-literal">true</span>,<br>url: <span class="hljs-string">"https://api.douban.com/v2/book/search"</span>,<br><span class="hljs-built_in">type</span>: <span class="hljs-string">"GET"</span>,<br>dataType: <span class="hljs-string">"jsonp"</span>, // 返回的数据类型，设置为JSONP方式<br>jsonp: <span class="hljs-string">'callback'</span>, //指定一个查询参数名称来覆盖默认的 jsonp 回调参数名 callback<br>jsonpCallback: <span class="hljs-string">'handleResponse'</span>, //设置回调函数名<br>data: &#123;<br>q: <span class="hljs-string">"javascript"</span>,<br>count: 1<br>&#125;,<br>success: <span class="hljs-keyword">function</span>(response, status, xhr) &#123;<br>console.log(<span class="hljs-string">'状态为：'</span> + status + <span class="hljs-string">',状态是：'</span> + xhr.statusText);<br>console.log(response);<br>&#125;<br>&#125;);<br>&#125;);    <br><br><br>$.getJSON(<span class="hljs-string">"https://api.douban.com/v2/book/search?callback=?"</span>,&#123;q:<span class="hljs-string">"javascript"</span>,count:1&#125;,<span class="hljs-keyword">function</span>(data)&#123;<br>console.log(data);<br>&#125;)<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>2.<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span> src=<span class="hljs-string">"js/jquery-1.11.1.js"</span>&gt;&lt;/script&gt;<br>&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;<br>var url = <span class="hljs-string">"http://localhost:8080/html5/jsonp_data.js"</span>;<br>// 创建script标签，设置其属性<br>var script = document.createElement(<span class="hljs-string">'script'</span>);<br>script.setAttribute(<span class="hljs-string">'src'</span>, url);<br>// 把script标签加入head，此时调用开始<br>document.getElementsByTagName(<span class="hljs-string">'head'</span>)[0].appendChild(script);<br><span class="hljs-keyword">function</span> callbackFun(data)<br>&#123;<br>    console.log(data.age);<br>    console.log(data.name);<br>&#125;  <br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<h2 id="方式三：CORS"><a href="#方式三：CORS" class="headerlink" title="方式三：CORS"></a>方式三：CORS</h2><p>​ Cross-Origin Resource Sharing（CORS）跨域资源共享是一份浏览器技术的规范，提供了 Web 服务从不同域传来沙盒脚本的方法，以避开浏览器的同源策略，确保安全的跨域数据传输。现代浏览器使用CORS在API容器如XMLHttpRequest来减少HTTP请求的风险来源。与 JSONP 不同，CORS 除了 GET 要求方法以外也支持其他的 HTTP 要求。服务器一般需要增加如下响应头的一种或几种：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">Access-Control-Allow-Origin: *<br>Access-Control-Allow-Methods: POST, GET, OPTIONS<br>Access-Control-Allow-Headers: X-PINGOTHER, Content-Type<br>Access-Control-Max-Age: 86400<br></code></pre></td></tr></table></figure></p>
+<p>跨域请求默认不会携带Cookie信息，如果需要携带请配置下属参数：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-string">"Access-Control-Allow-Credentials"</span>: <span class="hljs-literal">true</span><br>// Ajax设置<br><span class="hljs-string">"withCredentials"</span>: <span class="hljs-literal">true</span><br></code></pre></td></tr></table></figure></p>
+<h2 id="方式四-window-name-iframe"><a href="#方式四-window-name-iframe" class="headerlink" title="方式四:window.name+iframe"></a>方式四:window.name+iframe</h2><p>​ window.name通过在iframe（一般动态创建i）中加载跨域HTML文件来起作用。然后，HTML文件将传递给请求者的字符串内容赋值给window.name。然后，请求者可以检索window.name值作为响应。</p>
+<ul>
+<li>iframe标签的跨域能力；</li>
+<li>window.name属性值在文档刷新后依旧存在的能力（且最大允许2M左右）。<br>每个iframe都有包裹它的window，而这个window是top window的子窗口。contentWindow属性返回&lt;iframe>元素的Window对象。你可以使用这个Window对象来访问iframe的文档及其内部DOM。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;!-- <br> 下述用端口 <br> 10000表示：domainA<br> 10001表示：domainB<br>--&gt;<br><br>&lt;!-- localhost:10000 --&gt;<br>&lt;script&gt;<br>  var iframe = document.createElement(<span class="hljs-string">'iframe'</span>);<br>  iframe.style.display = <span class="hljs-string">'none'</span>; // 隐藏<br><br>  var state = 0; // 防止页面无限刷新<br>  iframe.onload = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>      <span class="hljs-keyword">if</span>(state === 1) &#123;<br>          console.log(JSON.parse(iframe.contentWindow.name));<br>          // 清除创建的iframe<br>          iframe.contentWindow.document.write(<span class="hljs-string">''</span>);<br>          iframe.contentWindow.close();<br>          document.body.removeChild(iframe);<br>      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(state === 0) &#123;<br>          state = 1;<br>          // 加载完成，指向当前域，防止错误(proxy.html为空白页面)<br>          // Blocked a frame with origin <span class="hljs-string">"http://localhost:10000"</span> from accessing a cross-origin frame.<br>          iframe.contentWindow.location = <span class="hljs-string">'http://localhost:10000/proxy.html'</span>;<br>      &#125;<br>  &#125;;<br><br>  iframe.src = <span class="hljs-string">'http://localhost:10001'</span>;<br>  document.body.appendChild(iframe);<br>&lt;/script&gt;<br><br>&lt;!-- localhost:10001 --&gt;<br>&lt;!DOCTYPE html&gt;<br>...<br>&lt;script&gt;<br>  window.name = JSON.stringify(&#123;a: 1, b: 2&#125;);<br>&lt;/script&gt;<br>&lt;/html&gt;<br></code></pre></td></tr></table></figure>
+<p><strong>注意</strong><br>直接嵌入其他域（localhots:10001）下的URL会报错，所以需要加载完成替换为当前域的URL(localhots:10000)，proxy.html为空白页面，只为解决该问题；<br><img src="https://img-blog.csdn.net/20170611224841482?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvbGlnYW5nMjU4NTExNg==/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt><br>跨域请求iframe<br>重新设置src（<a href="http://localhost:10000/proxy.html）后导致页面不断刷新，所以通过state来控制；" target="_blank" rel="noopener">http://localhost:10000/proxy.html）后导致页面不断刷新，所以通过state来控制；</a><br>全部获取完结果后，清除该iframe。</p>
+<h2 id="方式五：window-postMessage"><a href="#方式五：window-postMessage" class="headerlink" title="方式五：window.postMessage()"></a>方式五：window.postMessage()</h2><p>HTML5新特性，可以用来向其他所有的 window 对象发送消息。需要注意的是我们必须要保证所有的脚本执行完才发送 MessageEvent，如果在函数执行的过程中调用了它，就会让后面的函数超时无法执行。<br><strong>下述代码实现了跨域存储localStorage</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;!-- <br> 下述用端口 <br> 10000表示：domainA<br> 10001表示：domainB<br>--&gt;<br><br>&lt;!-- localhost:10000 --&gt;<br>&lt;iframe src=<span class="hljs-string">"http://localhost:10001/msg.html"</span> name=<span class="hljs-string">"myPostMessage"</span> style=<span class="hljs-string">"display:none;"</span>&gt;<br>&lt;/iframe&gt;<br><br>&lt;script&gt;<br>  <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">main</span></span>() &#123;<br>      LSsetItem(<span class="hljs-string">'test'</span>, <span class="hljs-string">'Test: '</span> + new Date());<br>      LSgetItem(<span class="hljs-string">'test'</span>, <span class="hljs-keyword">function</span>(value) &#123;<br>          console.log(<span class="hljs-string">'value: '</span> + value);<br>      &#125;);<br>      LSremoveItem(<span class="hljs-string">'test'</span>);<br>  &#125;<br><br>  var callbacks = &#123;&#125;;<br>  window.addEventListener(<span class="hljs-string">'message'</span>, <span class="hljs-keyword">function</span>(event) &#123;<br>      <span class="hljs-keyword">if</span> (event.source === frames[<span class="hljs-string">'myPostMessage'</span>]) &#123;<br>          console.log(event)<br>          var data = /^<span class="hljs-comment">#localStorage#(\d+)(null)?#([\S\s]*)/.exec(event.data);</span><br>          <span class="hljs-keyword">if</span> (data) &#123;<br>              <span class="hljs-keyword">if</span> (callbacks[data[1]]) &#123;<br>                  callbacks[data[1]](data[2] === <span class="hljs-string">'null'</span> ? null : data[3]);<br>              &#125;<br>              delete callbacks[data[1]];<br>          &#125;<br>      &#125;<br>  &#125;, <span class="hljs-literal">false</span>);<br><br>  var domain = <span class="hljs-string">'*'</span>;<br>  // 增加<br>  <span class="hljs-keyword">function</span> LSsetItem(key, value) &#123;<br>      var obj = &#123;<br>          setItem: key,<br>          value: value<br>      &#125;;<br>      frames[<span class="hljs-string">'myPostMessage'</span>].postMessage(JSON.stringify(obj), domain);<br>  &#125;<br>  // 获取<br>  <span class="hljs-keyword">function</span> LSgetItem(key, callback) &#123;<br>      var identifier = new Date().getTime();<br>      var obj = &#123;<br>          identifier: identifier,<br>          getItem: key<br>      &#125;;<br>      callbacks[identifier] = callback;<br>      frames[<span class="hljs-string">'myPostMessage'</span>].postMessage(JSON.stringify(obj), domain);<br>  &#125;<br>  // 删除<br>  <span class="hljs-keyword">function</span> LSremoveItem(key) &#123;<br>      var obj = &#123;<br>          removeItem: key<br>      &#125;;<br>      frames[<span class="hljs-string">'myPostMessage'</span>].postMessage(JSON.stringify(obj), domain);<br>  &#125;<br>&lt;/script&gt;<br><br>&lt;!-- localhost:10001 --&gt;<br>&lt;script&gt;<br>  window.addEventListener(<span class="hljs-string">'message'</span>, <span class="hljs-keyword">function</span>(event) &#123;<br>    console.log(<span class="hljs-string">'Receiver debugging'</span>, event);<br>    <span class="hljs-keyword">if</span> (event.origin == <span class="hljs-string">'http://localhost:10000'</span>) &#123;<br>      var data = JSON.parse(event.data);<br>      <span class="hljs-keyword">if</span> (<span class="hljs-string">'setItem'</span> <span class="hljs-keyword">in</span> data) &#123;<br>        localStorage.setItem(data.setItem, data.value);<br>      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-string">'getItem'</span> <span class="hljs-keyword">in</span> data) &#123;<br>        var gotItem = localStorage.getItem(data.getItem);<br>        event.source.postMessage(<br>          <span class="hljs-string">'#localStorage#'</span> + data.identifier +<br>          (gotItem === null ? <span class="hljs-string">'null#'</span> : <span class="hljs-string">'#'</span> + gotItem),<br>          event.origin<br>        );<br>      &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (<span class="hljs-string">'removeItem'</span> <span class="hljs-keyword">in</span> data) &#123;<br>        localStorage.removeItem(data.removeItem);<br>      &#125;<br>    &#125;<br>  &#125;, <span class="hljs-literal">false</span>);<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p><strong>Safari下会报错</strong></p>
+<blockquote>
+<p>Blocked a frame with origin “<a href="http://localhost:10001”" target="_blank" rel="noopener">http://localhost:10001”</a> from accessing a frame with origin “<a href="http://localhost:10000“" target="_blank" rel="noopener">http://localhost:10000“</a>. Protocols, domains, and ports must match.</p>
+</blockquote>
+<p>避免该错误，可以在Safari浏览器中勾选开发菜单==&gt;停用跨域限制。或者只能使用服务器端转存的方式实现，因为Safari浏览器默认只支持CORS跨域请求。</p>
+<h2 id="方式六：修改document-domain跨子域"><a href="#方式六：修改document-domain跨子域" class="headerlink" title="方式六：修改document.domain跨子域"></a>方式六：修改document.domain跨子域</h2><p>前提条件：这两个域名必须属于同一个基础域名!而且所用的协议，端口都要一致，否则无法利用document.domain进行跨域，所以只能跨子域<br>​ 在根域范围内，允许把domain属性的值设置为它的上一级域。例如，在”aaa.xxx.com”域内，可以把domain设置为 “xxx.com” 但不能设置为 “xxx.org” 或者”com”。</p>
+<blockquote>
+<p>现在存在两个域名aaa.xxx.com和bbb.xxx.com。在aaa下嵌入bbb的页面，由于其document.name不一致，无法在aaa下操作bbb的js。可以在aaa和bbb下通过js将document.name = ‘xxx.com’;设置一致，来达到互相访问的作用。</p>
+</blockquote>
+<h2 id="方式七：WebSocket"><a href="#方式七：WebSocket" class="headerlink" title="方式七：WebSocket"></a>方式七：WebSocket</h2><p>WebSocket protocol 是HTML5一种新的协议。它实现了浏览器与服务器全双工通信，同时允许跨域通讯，是server push技术的一种很棒的实现。相关文章，请查看：<a href="https://blog.csdn.net/ligang2585116/article/details/47259301" target="_blank" rel="noopener">WebSocket</a>、<a href="https://blog.csdn.net/ligang2585116/article/details/47277917" target="_blank" rel="noopener">WebSocket-SockJS</a></p>
+<p><strong>需要注意：</strong>WebSocket对象不支持DOM 2级事件侦听器，必须使用DOM 0级语法分别定义各个事件。</p>
+<h2 id="方式八：代理"><a href="#方式八：代理" class="headerlink" title="方式八：代理"></a>方式八：代理</h2><p>同源策略是针对浏览器端进行的限制，可以通过服务器端来解决该问题</p>
+<p>DomainA客户端（浏览器） ==&gt; DomainA服务器 ==&gt; DomainB服务器 ==&gt; DomainA客户端（浏览器）<br>实现HTTP，HTTPS代理请参照：<a href="https://blog.csdn.net/ligang2585116/article/details/72827781" target="_blank" rel="noopener">创建HTTP与HTTPS服务器与客户端</a></p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#浏览器的同源策略"><span class="toc-text">浏览器的同源策略</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#跨域请求方式"><span class="toc-text">跨域请求方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式一：图片或script标签跨域"><span class="toc-text">方式一：图片或script标签跨域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式二：JSONP跨域"><span class="toc-text">方式二：JSONP跨域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式三：CORS"><span class="toc-text">方式三：CORS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式四-window-name-iframe"><span class="toc-text">方式四:window.name+iframe</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式五：window-postMessage"><span class="toc-text">方式五：window.postMessage()</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式六：修改document-domain跨子域"><span class="toc-text">方式六：修改document.domain跨子域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式七：WebSocket"><span class="toc-text">方式七：WebSocket</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#方式八：代理"><span class="toc-text">方式八：代理</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/14/函数节流与函数防抖/" class="prev">&larr; Prev post 函数节流与函数防抖</a>
+  
+
+  
+
+  
+    <a href="/2018/08/04/js严格模式与非严格模式/" class="next">Next post js严格模式与非严格模式 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

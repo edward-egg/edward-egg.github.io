@@ -1,0 +1,409 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="严格模式与非严格模式的不同1.严格模式下，不允许用with123456789101112!function () &#123;    with(&#123; x: 1 &#125;) &#123;        console.log(x);  //1    &#125;&#125;()!function () &#123;    'use strict';    with(&#123; x...">
+  
+  <title>js严格模式与非严格模式 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/13/8种方式实现跨域请求/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        8种方式实现跨域请求
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/02/js关于作用域，作用域链和闭包的理解/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js关于作用域，作用域链和闭包的理解
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>js严格模式与非严格模式</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-04</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="严格模式与非严格模式的不同"><a href="#严格模式与非严格模式的不同" class="headerlink" title="严格模式与非严格模式的不同"></a>严格模式与非严格模式的不同</h2><h3 id="1-严格模式下，不允许用with"><a href="#1-严格模式下，不允许用with" class="headerlink" title="1.严格模式下，不允许用with"></a>1.严格模式下，不允许用with</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    with(&#123; x: 1 &#125;) &#123;<br>        console.log(x);  //1<br>    &#125;<br>&#125;()<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    with(&#123; x: 1 &#125;) &#123;<br>        console.log(x);  //SyntaxError<br>    &#125;<br>&#125;()<br></code></pre></td></tr></table></figure>
+<p>一种取代 with 的简单方法是，将目标对象赋给一个短命名变量，然后访问这个变量上的相应属性。</p>
+<p>ps：解释下!function () {}();<br>解释器在解释一个语句时，如果以function开头，就会理解为函数声明。<br>而前面加一个”!”可以让解释器理解为函数表达式，这样就可以立即调用了。</p>
+<h3 id="严格模式下，不允许给未声明的变量赋值"><a href="#严格模式下，不允许给未声明的变量赋值" class="headerlink" title="严格模式下，不允许给未声明的变量赋值"></a>严格模式下，不允许给未声明的变量赋值</h3><h3 id="严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用"><a href="#严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用" class="headerlink" title="严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用"></a>严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-keyword">function</span>(a) &#123;<br>    arguments[0] = 100;<br>    console.log(a);  //100<br>&#125;(1);<br><br>!<span class="hljs-keyword">function</span>(a) &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    arguments[0] = 100;<br>    console.log(a);  //1<br>&#125;(1);<br></code></pre></td></tr></table></figure>
+<p>但是：传的参数是对象除外。arguments和形参共享传递。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-keyword">function</span>(a) &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    console.log(a.x);  //1<br>    arguments[0].x = 100;<br>    console.log(a.x);  //100<br>&#125;(&#123;x: 1&#125;);<br></code></pre></td></tr></table></figure>
+<h3 id="4-严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。-静默失败：不报错也没有任何效果"><a href="#4-严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。-静默失败：不报错也没有任何效果" class="headerlink" title="4.严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。(静默失败：不报错也没有任何效果)"></a>4.严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。(静默失败：不报错也没有任何效果)</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-keyword">function</span>(a) &#123;<br>    console.log(a);  //1<br>    console.log(delete a);  //<span class="hljs-literal">false</span><br>    console.log(a);  //1<br>&#125;(1);<br><br>!<span class="hljs-keyword">function</span>(a) &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    console.log(a);  //1<br>    delete a;  //SyntaxError（语法错误）<br>    console.log(a);  //1<br>&#125;(1)<br></code></pre></td></tr></table></figure>
+<h3 id="5-严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。"><a href="#5-严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。" class="headerlink" title="5.严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。"></a>5.严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-keyword">function</span> (a, a, b) &#123;<br>    console.log(a + b);  //5<br>&#125;(1, 2, 3);<br><br>!<span class="hljs-keyword">function</span> (a, a, b) &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    console.log(a + b);  //SyntaxError<br>&#125;(1, 2, 3);<br></code></pre></td></tr></table></figure>
+<h3 id="6-严格模式下，删除不可配置-configurable-false-的属性报错。非严格模式返回false，静默失败。"><a href="#6-严格模式下，删除不可配置-configurable-false-的属性报错。非严格模式返回false，静默失败。" class="headerlink" title="6.严格模式下，删除不可配置(configurable=false)的属性报错。非严格模式返回false，静默失败。"></a>6.严格模式下，删除不可配置(configurable=false)的属性报错。非严格模式返回false，静默失败。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-keyword">function</span> (a)&#123;<br>    var obj=&#123;&#125;;<br>    Object.defineProperty(obj,<span class="hljs-string">'a'</span>,&#123; configurable: <span class="hljs-literal">false</span> &#125;);<br>    console.log(delete obj.a); //flase<br>&#125;(1);  <br><br>!<span class="hljs-keyword">function</span> (a)&#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var obj=&#123;&#125;;<br>    Object.defineProperty(obj, <span class="hljs-string">'a'</span>, &#123; configurable: <span class="hljs-literal">false</span> &#125;);<br>    console.log(delete obj.a); //TypeError<br>&#125;(1);<br></code></pre></td></tr></table></figure>
+<h3 id="7-严格模式下，修改不可写-writable-false-的属性报错。"><a href="#7-严格模式下，修改不可写-writable-false-的属性报错。" class="headerlink" title="7.严格模式下，修改不可写(writable=false)的属性报错。"></a>7.严格模式下，修改不可写(writable=false)的属性报错。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    var obj = &#123; a: 1 &#125;;<br>    Object.defineProperty(obj, <span class="hljs-string">'a'</span>, &#123; writable: <span class="hljs-literal">false</span> &#125;);<br>    obj.a = 2;<br>    console.log(obj.a);  //1  //证明没有被修改<br>&#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var obj = &#123; a: 1 &#125;;<br>    Object.defineProperty(obj, <span class="hljs-string">'a'</span>, &#123;writable: <span class="hljs-literal">false</span>&#125;);<br>    obj.a = 2;  //TypeError<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="8-严格模式下，对象字面量重复属性名报错。"><a href="#8-严格模式下，对象字面量重复属性名报错。" class="headerlink" title="8.严格模式下，对象字面量重复属性名报错。"></a>8.严格模式下，对象字面量重复属性名报错。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>     var obj = &#123; x: 1, x: 2 &#125;;<br>     console.log(obj.x);  //2<br> &#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var obj = &#123; x: 1, x: 2 &#125;;  <br>    console.log(obj.x);  //IE10+报错。IE7~9、Chrome、FF不报错，结果为：2<br>&#125;();<br></code></pre></td></tr></table></figure>
+<p>亲测：IE10+报错：strict 模式下不允许一个属性有多个定义。IE7~9，Chrome，FF不报错。其他浏览器未测。</p>
+<h3 id="9-严格模式下，禁止八进制字面量。"><a href="#9-严格模式下，禁止八进制字面量。" class="headerlink" title="9.严格模式下，禁止八进制字面量。"></a>9.严格模式下，禁止八进制字面量。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> ()&#123;<br>    console.log(0123); //83<br>&#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span> ()&#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    console.log(0123); //SyntaxError<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="10-严格模式下，eval，arguments成为关键字，不能用作变量，函数名。"><a href="#10-严格模式下，eval，arguments成为关键字，不能用作变量，函数名。" class="headerlink" title="10.严格模式下，eval，arguments成为关键字，不能用作变量，函数名。"></a>10.严格模式下，eval，arguments成为关键字，不能用作变量，函数名。</h3><h3 id="11-严格模式下，eval变成了独立作用域。"><a href="#11-严格模式下，eval变成了独立作用域。" class="headerlink" title="11.严格模式下，eval变成了独立作用域。"></a>11.严格模式下，eval变成了独立作用域。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    <span class="hljs-built_in">eval</span>(<span class="hljs-string">'var evalVal = 2;'</span>);<br>    console.log(typeof evalVal);  //number<br>&#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    <span class="hljs-built_in">eval</span>(<span class="hljs-string">'var evalVal = 2;'</span>);<br>    console.log(typeof evalVal);  //undefined<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="12-严格模式下，给只读属性赋值报错。"><a href="#12-严格模式下，给只读属性赋值报错。" class="headerlink" title="12.严格模式下，给只读属性赋值报错。"></a>12.严格模式下，给只读属性赋值报错。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var obj = &#123; get <span class="hljs-function"><span class="hljs-title">x</span></span>() &#123; <span class="hljs-built_in">return</span> 17; &#125; &#125;;<br>    obj.x = 5;  //TypeError<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="13-严格模式下，给不可扩展对象的新属性赋值报错。"><a href="#13-严格模式下，给不可扩展对象的新属性赋值报错。" class="headerlink" title="13.严格模式下，给不可扩展对象的新属性赋值报错。"></a>13.严格模式下，给不可扩展对象的新属性赋值报错。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var fixed = &#123; oldProp: <span class="hljs-string">"hello"</span> &#125;;<br>    Object.preventExtensions(fixed);<br>    fixed.newProp = <span class="hljs-string">"world"</span>; //TypeError<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="14-ES6中，严格模式下，禁止设置五种基本类型值的属性。"><a href="#14-ES6中，严格模式下，禁止设置五种基本类型值的属性。" class="headerlink" title="14.ES6中，严格模式下，禁止设置五种基本类型值的属性。"></a>14.ES6中，严格模式下，禁止设置五种基本类型值的属性。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    undefined.aaa = <span class="hljs-string">'aaa'</span>;  //TypeError<br>    null.bbb = <span class="hljs-string">'bbb'</span>;  //TypeError<br>    false.ccc = <span class="hljs-string">'ccc'</span>;  //TypeError<br>    (123).ddd = <span class="hljs-string">'ddd'</span>;  //TypeError<br>    <span class="hljs-string">"hello"</span>.eee = <span class="hljs-string">'eee'</span>;  //TypeError<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="15-严格模式下，一般函数调用-不是对象的方法调用，也不使用apply-call-bind等修改this-，this指向undefined，而不是全局对象。"><a href="#15-严格模式下，一般函数调用-不是对象的方法调用，也不使用apply-call-bind等修改this-，this指向undefined，而不是全局对象。" class="headerlink" title="15.严格模式下，一般函数调用(不是对象的方法调用，也不使用apply/call/bind等修改this)，this指向undefined，而不是全局对象。"></a>15.严格模式下，一般函数调用(不是对象的方法调用，也不使用apply/call/bind等修改this)，this指向undefined，而不是全局对象。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun</span></span>() &#123; <span class="hljs-built_in">return</span> this; &#125;<br>    console.log( fun() );  //Window<br>&#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun</span></span>() &#123; <span class="hljs-built_in">return</span> this; &#125;<br>    console.log( fun() );  //undefined<br>&#125;();<br></code></pre></td></tr></table></figure>
+<p><strong>注意</strong>: 这一点百度上好多说的是this会指向null，这是不对的，查看了MDN之后，上面明确写出this指向undefined。Chrome下亲测也是如此。</p>
+<h3 id="16-严格模式下，使用apply-call-bind，当传入参数是null-undefined时，this指向null-undefined，而不是全局对象。"><a href="#16-严格模式下，使用apply-call-bind，当传入参数是null-undefined时，this指向null-undefined，而不是全局对象。" class="headerlink" title="16.严格模式下，使用apply/call/bind，当传入参数是null/undefined时，this指向null/undefined，而不是全局对象。"></a>16.严格模式下，使用apply/call/bind，当传入参数是null/undefined时，this指向null/undefined，而不是全局对象。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun</span></span>() &#123; <span class="hljs-built_in">return</span> this; &#125;<br>    console.log( fun.apply(null) );  //Window<br>    console.log( fun.apply(undefined) );  //Window<br>    console.log( fun.call(null) );  //Window<br>    console.log( fun.call(undefined) );  //Window<br>    console.log( fun.bind(null)() );  //Window<br>    console.log( fun.bind(undefined)() );  //Window<br>&#125;();<br><br>!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun</span></span>() &#123; <span class="hljs-built_in">return</span> this; &#125;<br>    console.log( fun.apply(null) );  //null<br>    console.log( fun.apply(undefined) );  //undefined<br>    console.log( fun.call(null) );  //null<br>    console.log( fun.call(undefined) );  //undefined<br>    console.log( fun.bind(null)() );  //null<br>    console.log( fun.bind(undefined)() );  //undefined<br>&#125;();<br></code></pre></td></tr></table></figure>
+<h3 id="17-严格模式下，不再支持arguments-callee。非严格模式下，arguments-callee指向当前正在执行的函数。"><a href="#17-严格模式下，不再支持arguments-callee。非严格模式下，arguments-callee指向当前正在执行的函数。" class="headerlink" title="17.严格模式下，不再支持arguments.callee。非严格模式下，arguments.callee指向当前正在执行的函数。"></a>17.严格模式下，不再支持arguments.callee。非严格模式下，arguments.callee指向当前正在执行的函数。</h3><p>这个作用很小：直接给执行函数命名就可以了！此外，arguments.callee 十分不利于优化，例如内联函数，因为 arguments.callee 会依赖对非内联函数的引用。在严格模式下，arguments.callee 是一个不可删除属性，而且赋值和读取时都会抛出异常：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">'use strict'</span>;<br>    var fun = <span class="hljs-function"><span class="hljs-title">function</span></span> () &#123; <span class="hljs-built_in">return</span> arguments.callee; &#125;;<br>    fun(); //TypeError<br>&#125;();<br></code></pre></td></tr></table></figure></p>
+<h3 id="18-严格模式下，不再支持arguments-caller。"><a href="#18-严格模式下，不再支持arguments-caller。" class="headerlink" title="18.严格模式下，不再支持arguments.caller。"></a>18.严格模式下，不再支持arguments.caller。</h3><p>在一些旧时的ECMAScript实现中arguments.caller曾经是一个对象，里面存储的属性指向那个函数的变量。这是一个安全隐患，因为它通过函数抽象打破了本来被隐藏起来的保留值；它同时也是引起大量优化工作的原因。出于这些原因，现在的浏览器没有实现它。但是因为它这种历史遗留的功能，arguments.caller在严格模式下同样是一个不可被删除的属性，在赋值或者取值时会报错：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">"use strict"</span>;<br>    <span class="hljs-keyword">function</span> fun(a, b) &#123;<br>        var c = 12;<br>        <span class="hljs-built_in">return</span> arguments.caller; //IE10+报错。IE7~9、Chrome、FF不报错。<br>    &#125;<br>    console.log(fun(1, 2)); //在不报错的浏览器下，结果是：undefined<br>&#125;();<br></code></pre></td></tr></table></figure></p>
+<p>亲测：IE10+报错：strict 模式下不允许访问函数或参数对象的“caller”属性。IE7~9、Chrome、FF不报错。其他浏览器未测。</p>
+<h3 id="19-严格模式下，一些保留字。"><a href="#19-严格模式下，一些保留字。" class="headerlink" title="19.严格模式下，一些保留字。"></a>19.严格模式下，一些保留字。</h3><p>在严格模式中一部分字符变成了保留的关键字。这些字符包括implements, interface, let, package, private, protected, public, static 和 yield。在严格模式下，你不能再用这些名字作为变量名或者形参名。</p>
+<h3 id="20-严格模式下，禁止了不在脚本或者函数层面上的函数声明。"><a href="#20-严格模式下，禁止了不在脚本或者函数层面上的函数声明。" class="headerlink" title="20.严格模式下，禁止了不在脚本或者函数层面上的函数声明。"></a>20.严格模式下，禁止了不在脚本或者函数层面上的函数声明。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs bash">!<span class="hljs-function"><span class="hljs-title">function</span></span> () &#123;<br>    <span class="hljs-string">"use strict"</span>;<br>    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun</span></span>() &#123;&#125;<br>        console.log( fun() );  //IE10报错。IE11、IE7~9、Chrome、FF不报错。<br>    &#125;<br><br>    <span class="hljs-keyword">for</span> (var i = 0; i &lt; 5; i++) &#123;<br>        <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun2</span></span>() &#123;&#125;<br>        console.log( fun2() );  //IE10报错。IE11、IE7~9、Chrome、FF不报错。<br>    &#125;<br><br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun3</span></span>() &#123;  // 合法<br>        <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">fun4</span></span>() &#123;&#125;  //同样合法<br>    &#125;<br>&#125;();<br></code></pre></td></tr></table></figure>
+<p>亲测：IE10报错。IE11、IE7~9、Chrome、FF不报错。其他浏览器未测。</p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#严格模式与非严格模式的不同"><span class="toc-text">严格模式与非严格模式的不同</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-严格模式下，不允许用with"><span class="toc-text">1.严格模式下，不允许用with</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#严格模式下，不允许给未声明的变量赋值"><span class="toc-text">严格模式下，不允许给未声明的变量赋值</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用"><span class="toc-text">严格模式下，arguments变为参数的静态副本。非严格模式下，arguments对象里的元素和对应的参数是指向同一个值的引用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。-静默失败：不报错也没有任何效果"><span class="toc-text">4.严格模式下，删除参数名，函数名报错。非严格模式返回false，静默失败。(静默失败：不报错也没有任何效果)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。"><span class="toc-text">5.严格模式下，函数参数名重复报错。非严格模式最后一个重名参数会覆盖之前的重名参数。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-严格模式下，删除不可配置-configurable-false-的属性报错。非严格模式返回false，静默失败。"><span class="toc-text">6.严格模式下，删除不可配置(configurable=false)的属性报错。非严格模式返回false，静默失败。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-严格模式下，修改不可写-writable-false-的属性报错。"><span class="toc-text">7.严格模式下，修改不可写(writable=false)的属性报错。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-严格模式下，对象字面量重复属性名报错。"><span class="toc-text">8.严格模式下，对象字面量重复属性名报错。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-严格模式下，禁止八进制字面量。"><span class="toc-text">9.严格模式下，禁止八进制字面量。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-严格模式下，eval，arguments成为关键字，不能用作变量，函数名。"><span class="toc-text">10.严格模式下，eval，arguments成为关键字，不能用作变量，函数名。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-严格模式下，eval变成了独立作用域。"><span class="toc-text">11.严格模式下，eval变成了独立作用域。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-严格模式下，给只读属性赋值报错。"><span class="toc-text">12.严格模式下，给只读属性赋值报错。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-严格模式下，给不可扩展对象的新属性赋值报错。"><span class="toc-text">13.严格模式下，给不可扩展对象的新属性赋值报错。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#14-ES6中，严格模式下，禁止设置五种基本类型值的属性。"><span class="toc-text">14.ES6中，严格模式下，禁止设置五种基本类型值的属性。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#15-严格模式下，一般函数调用-不是对象的方法调用，也不使用apply-call-bind等修改this-，this指向undefined，而不是全局对象。"><span class="toc-text">15.严格模式下，一般函数调用(不是对象的方法调用，也不使用apply/call/bind等修改this)，this指向undefined，而不是全局对象。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#16-严格模式下，使用apply-call-bind，当传入参数是null-undefined时，this指向null-undefined，而不是全局对象。"><span class="toc-text">16.严格模式下，使用apply/call/bind，当传入参数是null/undefined时，this指向null/undefined，而不是全局对象。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#17-严格模式下，不再支持arguments-callee。非严格模式下，arguments-callee指向当前正在执行的函数。"><span class="toc-text">17.严格模式下，不再支持arguments.callee。非严格模式下，arguments.callee指向当前正在执行的函数。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#18-严格模式下，不再支持arguments-caller。"><span class="toc-text">18.严格模式下，不再支持arguments.caller。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#19-严格模式下，一些保留字。"><span class="toc-text">19.严格模式下，一些保留字。</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#20-严格模式下，禁止了不在脚本或者函数层面上的函数声明。"><span class="toc-text">20.严格模式下，禁止了不在脚本或者函数层面上的函数声明。</span></a></li></ol></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/13/8种方式实现跨域请求/" class="prev">&larr; Prev post 8种方式实现跨域请求</a>
+  
+
+  
+
+  
+    <a href="/2018/08/02/js关于作用域，作用域链和闭包的理解/" class="next">Next post js关于作用域，作用域链和闭包的理解 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

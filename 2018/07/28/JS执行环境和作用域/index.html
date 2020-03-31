@@ -1,0 +1,408 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="首先，我们要知道  执行环境和作用域是两个完全不同的概念  。函数的每次调用都有与之紧密相关的作用域和执行环境。从根本上来说， 作用域是基于函数的，而执行环境是基于对象的  (例如：全局执行环境即window对象)。换句话说，作用域涉及到所被调用函数中的变量访问，并且不同的调用场景是不一样的。  执行环境始终是this关键字的值 ，它是拥有当前所执行代码的对象的引用。  每个执行环境都有一个...">
+  
+  <title>JS执行环境和作用域 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/29/js深拷贝与浅拷贝/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js深拷贝与浅拷贝
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/28/js-Promise/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        js Promise
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>JS执行环境和作用域</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-28</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <p>首先，我们要知道 <strong> 执行环境和作用域是两个完全不同的概念 </strong> 。<br>函数的每次调用都有与之紧密相关的作用域和执行环境。从根本上来说，<strong> 作用域是基于函数的，而执行环境是基于对象的 </strong> (例如：全局执行环境即window对象)。<br>换句话说，作用域涉及到所被调用函数中的变量访问，并且不同的调用场景是不一样的。 <strong> 执行环境始终是this关键字的值 </strong>，它是拥有当前所执行代码的对象的引用。 <strong> 每个执行环境都有一个与之关联的变量对象，环境中定义的所有变量和函数都保存在这个对象中 </strong> 。虽然我们编写的代码无法访问这个对象，但解析器在处理数据时会在后台使用它。</p>
+<h2 id="执行环境（也称执行上下文–execution-context）"><a href="#执行环境（也称执行上下文–execution-context）" class="headerlink" title="执行环境（也称执行上下文–execution context）"></a>执行环境（也称执行上下文–execution context）</h2><p>当JavaScript解释器初始化执行代码时，它首先默认进入全局执行环境，从此刻开始，<strong> 函数的每次调用都会创建一个新的执行环境。 </strong><br>每个函数都有自己的执行环境。当执行流进入一个函数时，函数的环境就会被推入一个环境栈中（execution stack）。在函数执行完后，栈将其环境弹出，把控制权返回给之前的执行环境。ECMAScript程序中的执行流正是由这个便利的机制控制着。<br>执行环境可以分为 <strong> 创建和执行 </strong> 两个阶段。在创建阶段，解析器首先会创建一个 <strong> 变量对象 </strong>（variable object，也称为活动对象 activation object），它由定义在执行环境中的变量、函数声明、和参数组成。在这个阶段，作用域链会被初始化，this的值也会被最终确定。在执行阶段，代码被解释执行。<br>Demo：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;<br>    <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">Fn1</span></span>()&#123;<br>        <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">Fn2</span></span>()&#123;<br>            alert(document.body.tagName);//BODY<br>            //other code...<br>        &#125;<br>        Fn2();<br>    &#125;<br>    Fn1();<br>    //code here<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p><img src="https://img-blog.csdn.net/20160818165204236" alt="执行环境栈"></p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>当javascript代码被浏览器载入后，默认最先进入的是一个全局执行环境。当在全局执行环境中调用执行一个函数时，程序流就进入该被调用函数内，此时JS引擎就会为该函数创建一个新的执行环境，并且将其压入到执行环境堆栈的顶部。浏览器总是执行当前在堆栈顶部的执行环境，一旦执行完毕，该执行环境就会从堆栈顶部被弹出，然后，进入其下的执行环境执行代码。这样，堆栈中的执行环境就会被依次执行并且弹出堆栈，直到回到全局执行环境。<br>此外还要注意一下几点：</p>
+<ul>
+<li>单线程</li>
+<li>同步执行</li>
+<li>唯一的全局执行环境</li>
+<li>局部执行环境的个数没有限制</li>
+<li>每次某个函数被调用，就会有个新的局部执行环境为其创建，即使是多次调用的自身函数(即一个函数被调用多次，也会创建多个不同的局部执行环境)。</li>
+</ul>
+<h2 id="作用域"><a href="#作用域" class="headerlink" title="作用域"></a>作用域</h2><p>当代码在一个环境中执行时，<strong>会创建变量对象的一个作用域链</strong>（scope chain）。作用域链的用途是 <strong>保证对执行环境有权访问的所有变量和函数的有序访问</strong> 。<br><strong>作用域链包含了执行环境栈中的每个执行环境对应的变量对象。</strong>通过作用域链，可以决定变量的访问和标识符的解析。<br><strong>注意</strong>：全局执行环境的变量对象始终都是作用域链的最后一个对象。</p>
+<p>在访问变量时，就必须存在一个可见性的问题(<strong>内层环境可以访问外层中的变量和函数，而外层环境不能访问内层的变量和函数</strong>)。更深入的说，当访问一个变量或调用一个函数时，JavaScript引擎将不同执行环境中的变量对象按照规则 <strong>构建一个链表</strong>，在访问一个变量时，先在链表的第一个变量对象上查找，如果没有找到则继续在第二个变量对象上查找，直到搜索到全局执行环境的变量对象即 <strong>window对象</strong>。这也就形成了Scope Chain的概念。 </p>
+<p><img src="https://img-blog.csdn.net/20160818165843993" alt="作用域链"></p>
+<p>Demo:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs bash">var color = <span class="hljs-string">"blue"</span>;<br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">changeColor</span></span>()&#123;<br>  var anotherColor = <span class="hljs-string">"red"</span>;<br>  <span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">swapColors</span></span>()&#123;<br>    var tempColor = anotherColor;<br>    anotherColor = color;<br>    color = tempColor;<br>    // 这里可以访问color, anotherColor, 和 tempColor<br>  &#125;<br>  // 这里可以访问color 和 anotherColor，但是不能访问 tempColor<br>  swapColors();<br>&#125;<br>changeColor();<br>// 这里只能访问color<br>console.log(<span class="hljs-string">"Color is now "</span> + color);<br></code></pre></td></tr></table></figure></p>
+<p>上述代码一共包括三个执行环境：全局执行环境、changeColor()的局部执行环境、swapColors()的局部执行环境。</p>
+<ul>
+<li>全局环境有一个变量color和一个函数changecolor();</li>
+<li>changecolor()函数的局部环境中具有一个anothercolor属性和一个swapcolors函数，当然，changecolor函数中可以访问自身以及它外围（即全局环境）中的变量;</li>
+<li>swapcolor()函数的局部环境中具有一个变量tempcolor。在该函数内部可以访问上面的两个环境（changecolor和window）中的所有变量，因为那两个环境都是它的父执行环境。<br>上述代码的作用域链如下图所示： </li>
+</ul>
+<p>内部环境可以通过作用域链访问所有的外部环境，但是外部环境不能访问内部环境中的任何变量和函数。<br>标识符解析（变量名或函数名搜索）是沿着作用域链一级一级地搜索标识符的过程。搜索过程始终从作用域链的前端开始，然后逐级地向后（全局执行环境）回溯，直到找到标识符为止。</p>
+<h2 id="执行环境与作用域的区别于联系"><a href="#执行环境与作用域的区别于联系" class="headerlink" title="执行环境与作用域的区别于联系"></a>执行环境与作用域的区别于联系</h2><p>执行环境为全局执行环境和局部执行环境，局部执行环境是函数执行过程中创建的。<br><strong>作用域链是基于执行环境的变量对象的</strong>，由所有执行环境的变量对象(对于函数而言是活动对象，因为在函数执行环境中，变量对象是不能直接访问的，此时由活动对象(activation object,缩写为AO)扮演VO(变量对象)的角色。)共同组成。<br>当代码在一个环境中执行时，会创建变量对象的一个作用域链。作用域链的用途：是保证对执行环境有权访问的所有变量和函数的有序访问。作用域链的前端，始终都是当前执行的代码所在环境的变量对象。</p>
+<p>Demo:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;<br>(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>    a= 5;<br>    console.log(window.a);//undefined<br>    var a = 1;//这里会发生变量声明提升<br>    console.log(a);//1<br>&#125;)();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>window.a之所以是undefined，是因为var a = 1;发生了变量声明提升。相当于如下代码：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script <span class="hljs-built_in">type</span>=<span class="hljs-string">"text/javascript"</span>&gt;<br>(<span class="hljs-function"><span class="hljs-title">function</span></span>()&#123;<br>    var a;//a是局部变量<br>    a = 5;//这里局部环境中有a，就不会找全局中的<br>    console.log(window.a);//undefined<br>    a = 1;//这里会发生变量声明提升<br>    console.log(a);//1<br>&#125;)();<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#执行环境（也称执行上下文–execution-context）"><span class="toc-text">执行环境（也称执行上下文–execution context）</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#小结"><span class="toc-text">小结</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#作用域"><span class="toc-text">作用域</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#执行环境与作用域的区别于联系"><span class="toc-text">执行环境与作用域的区别于联系</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/29/js深拷贝与浅拷贝/" class="prev">&larr; Prev post js深拷贝与浅拷贝</a>
+  
+
+  
+
+  
+    <a href="/2018/07/28/js-Promise/" class="next">Next post js Promise &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

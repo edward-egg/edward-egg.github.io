@@ -1,0 +1,403 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="1.JS的垃圾回收机制JS解释器和C#，java的运行环境一样有垃圾回收机制，程序员不需要手动跟踪释放内存。
+垃圾回收机制就是释放那些不再使用的变量。什么是不再使用？就是生命周期结束的变量，可能是全局的和局部的。
+12345678910function A()&#123; var i = &#123;name:'qiqi'&#125;;&#125; function B()&#123;   ...">
+  
+  <title>JS的垃圾回收机制和内存分配 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/08/29/http头部信息详解/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        http头部信息详解
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/08/16/Service-Worker/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        Service Worker
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>JS的垃圾回收机制和内存分配</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-08-20</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="1-JS的垃圾回收机制"><a href="#1-JS的垃圾回收机制" class="headerlink" title="1.JS的垃圾回收机制"></a>1.JS的垃圾回收机制</h2><p>JS解释器和C#，java的运行环境一样有垃圾回收机制，程序员不需要手动跟踪释放内存。</p>
+<h3 id="垃圾回收机制"><a href="#垃圾回收机制" class="headerlink" title="垃圾回收机制"></a>垃圾回收机制</h3><p>就是释放那些不再使用的变量。什么是不再使用？就是生命周期结束的变量，可能是全局的和局部的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">A</span></span>()&#123;<br> var i = &#123;name:<span class="hljs-string">'qiqi'</span>&#125;;<br>&#125;<br> <br><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">B</span></span>()&#123;<br>   var i = &#123;name:<span class="hljs-string">'qiqi'</span>&#125;;<br>   <span class="hljs-built_in">return</span> i;<br>&#125;<br>var n = A();<br>var m =B();<br></code></pre></td></tr></table></figure>
+<h3 id="垃圾回收的方式"><a href="#垃圾回收的方式" class="headerlink" title="垃圾回收的方式"></a>垃圾回收的方式</h3><ol>
+<li><p>标记清除:<br>垃圾回收器会在运行的时候给存储在内存中的所有变量加上标记，然后去掉环境中的变量以及被环境中变量所引用的变量（闭包），在这些完成之后仍存在标记的就是要删除的变量了，因为环境中的变量已经无法访问到这些变量了，然后垃圾回收器相会这些带有标记的变量机器所占空间。至于怎么标记有很多种方式，比如特殊位的反转、维护一个列表等，这些并不重要。</p>
+</li>
+<li><p>引用计数：<br>在低版本IE中经常会出现内存泄露，很多时候就是因为其采用引用计数方式进行垃圾回收。引用计数的策略是跟踪记录每个值被使用的次数，当声明了一个变量并将一个引用类型赋值给该变量的时候这个值的引用次数就加1，如果该变量的值变成了另外一个，则这个值得引用次数减1，当这个值的引用次数变为0的时候，说明没有变量在使用，这个值没法被访问了，因此可以将其占用的空间回收，这样垃圾回收器会在运行的时候清理掉引用次数为0的值占用的空间。为什么很少有浏览器采用，还会带来内存泄露问题呢？主要是因为这种方式没办法解决循环引用问题。</p>
+</li>
+</ol>
+<h2 id="2-JS的内存分配"><a href="#2-JS的内存分配" class="headerlink" title="2.JS的内存分配"></a>2.JS的内存分配</h2><p>javascript中的变量分为两种，原始值和引用值。原始值指的是原始数据类型的值，比如undefined,null,number,string,boolean类型所表示的值。引用值指的是复合数据类型的值，即Object,Function,Array等。</p>
+<p>原始值和引用值存储在内存中的位置分别为栈和堆。原始值是存储在栈中的简单数据段，他们的值直接存储在变量访问的位置。引用值是存储在堆中的对象。</p>
+<p>存储在栈中的值是一个指针，指向存储在堆中的实际对象。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> Person(id,name,age)&#123; <br>this.id = id; <br>this.name = name; <br>this.age = age; <br>var num = 10; <br>var bol = <span class="hljs-literal">true</span>; <br>var str = <span class="hljs-string">"abc"</span>; <br>var obj = new Object(); <br>var arr = [<span class="hljs-string">'a'</span>,<span class="hljs-string">'b'</span>,<span class="hljs-string">'c'</span>]; <br>var person = new Person(100,<span class="hljs-string">"jxl"</span>,22);<br></code></pre></td></tr></table></figure>
+<p><img src="https://img-blog.csdn.net/20160708114641388?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt="堆栈图"><br>由上图可知我们无法直接操作存储在堆中的数据，但是我们可以通过栈中的引用来操作对象。</p>
+<p>栈的优势就是存取速度比堆要快，存放在一级缓存中，仅次于直接位于CPU中的寄存器，但缺点是，存在栈中的数据大小与生存期必须是确定的，缺乏灵活性。</p>
+<p>堆的优势是可以动态地分配内存大小，存在二级缓存中，生存期也不必事先告诉编译器，垃圾收集器会自动地收走这些不再使用的数据，比如对象和数组是可以无限拓展的，正好放在可以动态分配大小的堆中。但是缺点是由于在运行时动态分配内存，所以存取速度较慢。</p>
+<h2 id="3-JS解释器"><a href="#3-JS解释器" class="headerlink" title="3.JS解释器"></a>3.JS解释器</h2><p>就是执行你的javascript代码的东东，就像你的java代码由JVM执行，javascript是由javascript解释器执行，浏览器中一般都会包含这个。<br>每个浏览器的并不一样，一般都包含在各浏览器的内核中<br>浏览器内核一般包含两个引擎：页面排版引擎 和 JS引擎</p>
+<p>IE的 使用的自己的Trident 内核<br>FireFox 是Gecko内核<br>Opera 是Presto内核<br>Safari 使用的Webkit 内核<br>Chrome 是Google自己的 javascript V8引擎 而其页面排版采用的Webkit 内核</p>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-JS的垃圾回收机制"><span class="toc-text">1.JS的垃圾回收机制</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾回收机制"><span class="toc-text">垃圾回收机制</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#垃圾回收的方式"><span class="toc-text">垃圾回收的方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-JS的内存分配"><span class="toc-text">2.JS的内存分配</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-JS解释器"><span class="toc-text">3.JS解释器</span></a></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/08/29/http头部信息详解/" class="prev">&larr; Prev post http头部信息详解</a>
+  
+
+  
+
+  
+    <a href="/2018/08/16/Service-Worker/" class="next">Next post Service Worker &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

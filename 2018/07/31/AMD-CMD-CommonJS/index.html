@@ -1,0 +1,414 @@
+
+
+
+
+
+
+
+<!doctype html>
+<html lang="zh_CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <meta name="author" content="Edward">
+  
+  
+  
+  
+    <meta name="description" content="CommonJS规范CommonJS是在浏览器环境之外构建JavaScript生态系统为目标产生的项目，比如服务器和桌面环境中。CommonJS规范是为了解决JavaScript的作用域问题而定义的模块形式，可以使每个模块在它自身的命名空间中执行。该规范的主要内容是：模块必须通过  module.exports导出对外的变量或接口，通过require()来导入其他模块的输出到当前模块。例子：...">
+  
+  <title>AMD,CMD,CommonJS [ Edward Blog! ]</title>
+  
+    <link rel="alternate" href="/atom.xml" title="Edward Blog!">
+  
+  
+    <link rel="shortcut icon" href="/favicon.ico">
+  
+  
+  <link rel="stylesheet" href="/css/random.css">
+<link rel="stylesheet" href="/css/vegas.min.css">
+<link rel="stylesheet" href="/css/highlight-railscasts.css">
+<link rel="stylesheet" href="/css/jquery.fancybox.css">
+<link rel="stylesheet" href="/css/iconfont/iconfont.css">
+<link rel="stylesheet" href="/css/jquery.fancybox-thumbs.css">
+<link rel="stylesheet" href="/css/plyr.css">
+  
+</head>
+
+<body>
+<div class="side-navigate hide-area">
+  
+    <div class="item prev">
+      <a href="/2018/07/31/前端性能优化/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        前端性能优化
+      </div>
+    </div>
+  
+  
+    <div class="item next">
+      <a href="/2018/07/31/reflow与repaint/">
+        <div class="item-icon"></div>
+      </a>
+      <div class="item-title">
+        reflow与repaint
+      </div>
+    </div>
+  
+</div>
+<div id="outer-container" class="hide-area">
+<div id="container">
+  <div id="menu-outer" class="slide-down">
+    <div id="menu-inner">
+      <div id="brand">
+        
+        <a onclick="openUserCard()">
+          <img id="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+          <div id="homelink">Edward Blog!</div>
+        </a>
+      </div>
+      <div id="menu-list">
+        <ul>
+        
+        
+          
+            <li>
+          
+            <a href="/index.html">首页</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/archives">文章</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/tags">标签</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/categories">分类</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="/about">关于</a>
+            
+          </li>
+        
+          
+            <li>
+          
+            <a href="https://github.com/edward-egg">Github</a>
+            
+          </li>
+        
+        </ul>
+      </div>
+      <div id="show-menu">
+        <button>Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="content-outer">
+    <div id="content-inner">
+      
+      
+  <article id="post">
+    <h1>AMD,CMD,CommonJS</h1>
+    <p class="page-title-sub">
+      <span id="post-title-date">Created at 2018-07-31</span>
+      
+        <span id="post-title-updated">Updated at 2019-11-24</span>
+      
+      
+      <span id="post-title-categories">Category
+      
+      
+        
+        
+        <a href="/categories/JS/">JS</a>
+      
+      </span>
+      
+      
+      <span id="post-title-tags">
+      Tag
+      
+      
+        
+        
+        <a href="/tags/JavaScript/">JavaScript</a>
+      
+      </span>
+      
+    </p>
+    
+    <h2 id="CommonJS规范"><a href="#CommonJS规范" class="headerlink" title="CommonJS规范"></a>CommonJS规范</h2><p>CommonJS是在浏览器环境之外构建JavaScript生态系统为目标产生的项目，比如服务器和桌面环境中。CommonJS规范是为了解决JavaScript的作用域问题而定义的模块形式，<br>可以使每个模块在它自身的命名空间中执行。该规范的主要内容是：模块必须通过  module.exports导出对外的变量或接口，通过require()来导入其他模块的输出到当前模块。<br>例子：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">// moduleA.js<br>module.exports = <span class="hljs-keyword">function</span>( value )&#123;<br>    <span class="hljs-built_in">return</span> value * 2;<br>&#125;<br></code></pre></td></tr></table></figure></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">// moduleB.js<br>var multiplyBy2 = require(<span class="hljs-string">'./moduleA'</span>);<br>var result = multiplyBy2(4);<br></code></pre></td></tr></table></figure>
+<p>CommonJS是同步加载模块，但其实也有浏览器端的实现，其原理是将所有模块都定义好并通过id进行索引，这样就可以浏览器进行解析了</p>
+<p>服务器端的Node.js遵循CommonJS规范。核心思想是允许模块通过require 方法来同步加载所要依赖的其他模块，然后通过 exports或module.exports来导出需要暴露的接口。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">require(<span class="hljs-string">"module"</span>);<br>require(<span class="hljs-string">"../file.js"</span>);<br>exports.doStuff = <span class="hljs-function"><span class="hljs-title">function</span></span>() &#123;&#125;;<br>module.exports = someValue;<br></code></pre></td></tr></table></figure>
+<h3 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>服务器便于重用</li>
+<li>NPM中已经将近20W个模块包</li>
+<li>简单并容易使用</li>
+</ul>
+<h3 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h3><ul>
+<li>同步的模块方式不适合在浏览器环境中，同步意味着阻塞加载，浏览器资源是异步加载的</li>
+<li>不能非阻塞的并行加载多个模块</li>
+</ul>
+<h3 id="详细"><a href="#详细" class="headerlink" title="详细"></a>详细</h3><p><a href="http://zhaoda.net/webpack-handbook/module-system.html" target="_blank" rel="noopener">http://zhaoda.net/webpack-handbook/module-system.html</a><br><a href="http://javascript.ruanyifeng.com/nodejs/module.html#toc4" target="_blank" rel="noopener">http://javascript.ruanyifeng.com/nodejs/module.html#toc4</a></p>
+<hr>
+<h2 id="AMD-异步模块定义"><a href="#AMD-异步模块定义" class="headerlink" title="AMD(异步模块定义)"></a>AMD(异步模块定义)</h2><p>AMD规范其实只有一个主要接口 define(id,dependencies,factory)，它要在声明模块的时候指定所有的依赖dependencies，并且还要当做形参传到factory中，对于依赖的模块提前执行，依赖前置<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">define(<span class="hljs-string">"module"</span>, [<span class="hljs-string">"dep1"</span>, <span class="hljs-string">"dep2"</span>], <span class="hljs-keyword">function</span>(d1, d2) &#123;<br>  <span class="hljs-built_in">return</span> someExportedValue;<br>&#125;);<br>require([<span class="hljs-string">"module"</span>, <span class="hljs-string">"../file"</span>], <span class="hljs-keyword">function</span>(module, file) &#123; /* ... */ &#125;);<br></code></pre></td></tr></table></figure></p>
+<h3 id="优点：-1"><a href="#优点：-1" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>适合在浏览器环境异步加载</li>
+<li>并行加载多个模块<h3 id="缺点：-1"><a href="#缺点：-1" class="headerlink" title="缺点："></a>缺点：</h3></li>
+<li>提高开发成本，代码阅读和书写比较困难</li>
+<li>不符合通用的模块思维方式，是一种妥协的实现</li>
+</ul>
+<h3 id="详细-1"><a href="#详细-1" class="headerlink" title="详细"></a>详细</h3><p><a href="http://www.ruanyifeng.com/blog/2012/10/asynchronous_module_definition.html" target="_blank" rel="noopener">http://www.ruanyifeng.com/blog/2012/10/asynchronous_module_definition.html</a></p>
+<hr>
+<h2 id="CMD（通用模块定义）"><a href="#CMD（通用模块定义）" class="headerlink" title="CMD（通用模块定义）"></a>CMD（通用模块定义）</h2><p>CMD规范和AMD相似，尽量保持简单，并且与CommonJS和NodeJS的Modules规范保持了很大的兼容性。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">define(<span class="hljs-keyword">function</span>(require, exports, module) &#123;<br>  var $ = require(<span class="hljs-string">'jquery'</span>);<br>  var Spinning = require(<span class="hljs-string">'./spinning'</span>);<br>  exports.doSomething = ...<br>  module.exports = ...<br>&#125;)<br></code></pre></td></tr></table></figure></p>
+<h3 id="优点：-2"><a href="#优点：-2" class="headerlink" title="优点："></a>优点：</h3><ul>
+<li>依赖就近，延迟执行</li>
+<li>很容易在node中运行<h3 id="缺点：-2"><a href="#缺点：-2" class="headerlink" title="缺点："></a>缺点：</h3></li>
+<li>依赖SPM打包，模块的家在逻辑偏重<h3 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h3>SeaJS</li>
+</ul>
+
+  </article>
+  <div class="random-toc-area">
+  <button class="btn-hide-toc btn-hide-toc-show" style="display: none" onclick="TOCToggle()">Show TOC</button>
+  <button class="btn-hide-toc btn-hide-toc-hide" onclick="TOCToggle()">Hide TOC</button>
+  <div class="random-toc">
+    <h2>Table of Content</h2>
+    <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#CommonJS规范"><span class="toc-text">CommonJS规范</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点："><span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点："><span class="toc-text">缺点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#详细"><span class="toc-text">详细</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#AMD-异步模块定义"><span class="toc-text">AMD(异步模块定义)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点：-1"><span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点：-1"><span class="toc-text">缺点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#详细-1"><span class="toc-text">详细</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CMD（通用模块定义）"><span class="toc-text">CMD（通用模块定义）</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#优点：-2"><span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#缺点：-2"><span class="toc-text">缺点：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实现："><span class="toc-text">实现：</span></a></li></ol></li></ol>
+  </div>
+</div>
+
+  
+<nav id="pagination">
+  
+    <a href="/2018/07/31/前端性能优化/" class="prev">&larr; Prev post 前端性能优化</a>
+  
+
+  
+
+  
+    <a href="/2018/07/31/reflow与repaint/" class="next">Next post reflow与repaint &rarr;</a>
+  
+</nav>
+
+  <!-- JiaThis Button BEGIN -->
+
+<!-- JiaThis Button END -->
+
+
+      
+      
+    </div>
+  </div>
+
+  <div id="bottom-outer">
+    <div id="bottom-inner">
+      Site by Edward using
+      <a href="http://hexo.io">Hexo</a> & <a href="https://github.com/stiekel/hexo-theme-random">Random</a>
+      <br>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+
+<div id="user-card">
+  <div class="center-field">
+    <img class="avatar" src="https://images.unsplash.com/photo-1491743715344-d5eed2a9c5bd?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=39f2860d4712e5cfdceeaea7b6dcb338&auto=format&fit=crop&w=634&q=80">
+    <p id="description"></p>
+    <ul class="social-icon">
+  
+  
+    <li>
+      <a href="https://github.com/edward-egg">
+        
+          <i class="icon iconfont github">&#xe606;</i>
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://cn.vuejs.org/v2/guide/">
+        
+          VUE
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.angular.cn/">
+        
+          Angular
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://doc.react-china.org/">
+        
+          React
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.npmjs.com/">
+        
+          NPM
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.webpackjs.com/">
+        
+          Webpack
+        
+      </a>
+    </li>
+  
+    <li>
+      <a href="https://www.csdn.net/">
+        
+          CSDN
+        
+      </a>
+    </li>
+  
+</ul>
+  </div>
+</div>
+
+
+<div id="btn-view">Hide</div>
+
+<script>
+// is trigger analytics / tongji script
+var isIgnoreHost = false;
+
+if(window && window.location && window.location.host) {
+  isIgnoreHost = ["localhost","127.0.0.1"].some(function(address){
+    return 0 === window.location.host.indexOf(address);
+  });
+}
+
+var isTriggerAnalytics = !( true && isIgnoreHost );
+
+</script>
+
+
+
+
+  
+  
+    <script src="/js/jquery-2.2.3.min.js"></script>
+  
+    <script src="/js/vegas.min.js"></script>
+  
+    <script src="/js/random.js"></script>
+  
+    <script src="/js/highlight.pack.js"></script>
+  
+    <script src="/js/jquery.mousewheel.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox.pack.js"></script>
+  
+    <script src="/js/jquery.fancybox-thumbs.js"></script>
+  
+    <script src="/js/plyr.js"></script>
+  
+
+<script>
+
+  // fancybox
+  var backgroundImages = [];
+  
+  $('#post').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox') || $(this).parent().hasClass('fancybox-thumb')) return;
+      var alt = this.alt || this.title;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'post' + i);
+    });
+  });
+  $(".fancybox").fancybox();
+
+var vegasConfig = {"animation":"random","preload­Image":true,"transition":["slideLeft2","slideRight2","flash2"],"timer":true,"delay":5000,"shuffle":true,"count":28};
+var unsplashConfig = {"gravity":"north"};
+// is show background images
+var turnoffBackgroundImage = false;
+
+
+
+  turnoffBackgroundImage = true;
+
+
+var backgroundColor = "34495E";
+
+$(".fancybox-thumb").fancybox({
+  prevEffect: 'none',
+  nextEffect: 'none',
+  helpers: {
+    title: {
+      type: 'outside'
+    },
+    thumbs: {
+      width: 50,
+      height: 50
+    }
+  }
+});
+
+// show video with plyr
+$(".video-container iframe").each(function(i){
+  var url = $(this).attr('src');
+  var id = url.split('/').pop();
+  var plyrContainer = document.createElement('div');
+  plyrContainer.className = 'plyr';
+  var plyrElement = document.createElement('div');
+  plyrElement.dataset.videoId = id;
+  switch(true) {
+    case url.search('youtube.com') >= 0:
+      plyrElement.dataset.type = 'youtube';
+      break;
+    case url.search('vimeo.com') >= 0:
+      plyrElement.dataset.type = 'vimeo';
+      break;
+    default:
+      return;
+  };
+  plyrContainer.appendChild(plyrElement);
+  $(this).parent().html(plyrContainer);
+});
+plyr.setup('.plyr', {iconUrl: '/css/sprite.svg'});
+</script>
+</body>
+</html>
+
